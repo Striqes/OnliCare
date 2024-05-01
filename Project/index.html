@@ -3,118 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnliCare</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
-    </style>
-    <title>Document</title>
 </head>
 <body class="bg-white">
 
-
     <!-- NAV BAR -->
     <header>
-        <nav class="bg-white border-gray-200 dark:bg-green-900">
-            <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+        <nav class="bg-white border-b border-gray-200 dark:bg-green-900">
+            <div class="max-w-screen-xl mx-auto px-4 py-6 flex items-center justify-between">
                 <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
                     <img src="..\assets\onlicarelogo.svg" class="h-10" alt="Logo" />
-                    <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-yellow-400">OnliCare</span>
+                    <span class="text-2xl font-semibold whitespace-nowrap dark:text-yellow-400">OnliCare</span>
                 </a>
 
-                <div class="hidden w-full md:block md:w-auto" id="navbar-default">
-                <ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-yellow-100 rounded-lg bg-yellow-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-green-800 md:dark:bg-green-900 dark:border-green-700">
-                    <li>
-                    <a href="#" class="block py-2 px-3 text-white bg-green-700 rounded md:bg-transparent md:text-yellow-400 md:p-1 dark:text-white md:dark:text-yellow-300" aria-current="page">Home</a>
-                    </li>
-                    <li>
-                    <a href="#" class="block py-2 px-3 rounded hover:bg-yellow-100 md:hover:bg-transparent md:border-0 md:hover:text-green-700 md:p-1 dark:text-white md:dark:hover:text-yellow-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">About</a>
-                    </li>
-                    <li>
-                    <a href="#" class="block py-2 px-3 text-yellow-900 rounded hover:bg-yellow-100 md:hover:bg-transparent md:border-0 md:hover:text-green-700 md:p-1 dark:text-white md:dark:hover:text-yellow-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Services</a>
-                    </li>
-                    <li>
-                    <a href="#" class="rounded-[10px] block py-2 bg-yellow-600 scroll-px-32 text-yellow-900 rounded hover:bg-yellow-500 md:hover:bg-transparent md:border-0 md:govertext-green-700 md:p-1 dark:text-black md:dark:hover:text-green-800 dark:hover:bg-yellow-400 dark:hover:text-green-900">Log in</a>
-                    </li>
-                    <li>
-                    <a href="#" class="rounded-[10px] block py-2 bg-yellow-600 scroll-px-32 text-yellow-900 rounded hover:bg-yellow-500 md:hover:bg-transparent md:border-0 md:govertext-green-700 md:p-1 dark:text-black md:dark:hover:text-green-800 dark:hover:bg-yellow-400 dark:hover:text-green-900">Sign up</a>
-                    </li>
-                </ul>
+                <div class="hidden md:block">
+                    <ul class="flex space-x-8 font-medium">
+                        <li>
+                            <a href="#" class="block py-2 px-3 bg-green-700 text-white rounded hover:bg-transparent hover:text-green-700 dark:text-white dark:hover:text-yellow-300">Home</a>
+                        </li>
+                        <li>
+                            <a href="#" class="block py-2 px-3 rounded hover:bg-yellow-100 hover:text-green-700 dark:text-white dark:hover:text-yellow-500 dark:hover:bg-gray-700 dark:hover:text-white">About</a>
+                        </li>
+                        <li>
+                            <a href="#" class="block py-2 px-3 text-yellow-900 rounded hover:bg-yellow-100 hover:text-green-700 dark:text-white dark:hover:text-yellow-500 dark:hover:bg-gray-700 dark:hover:text-white">Services</a>
+                        </li>
+                        <li>
+                            <a href="#" class="block py-2 px-3 bg-yellow-600 text-yellow-900 rounded hover:bg-yellow-500 hover:text-green-800 dark:text-black dark:hover:text-green-800 dark:hover:bg-yellow-400 dark:hover:text-green-900">Log in</a>
+                        </li>
+                        <li>
+                            <a href="#" class="block py-2 px-3 bg-yellow-600 text-yellow-900 rounded hover:bg-yellow-500 hover:text-green-800 dark:text-black dark:hover:text-green-800 dark:hover:bg-yellow-400 dark:hover:text-green-900">Sign up</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </nav>
-    </header>    
-    
+    </header>
 
     <!-- CONTENT -->
+    <main class="bg-gray-100 p-20 pl-24">
+        <div class="container mx-auto grid md:grid-cols-2 min-h-screen">
+            <div class="max-w-screen-xl mx-auto flex flex-col justify-center">
+                <div class="text-green-950 text-4xl md:text-5xl font-bold">OnliCare Commitment to Quality <br>and Best Service</div>
+                <div class="mt-2 md:mt-0 text-green-800 text-lg md:text-2xl font-bold">Discover our dedication to providing exceptional<br> healthcare across all aspects of patient care.</div>
     
-    <div class="container grid md:grid-cols-2 mx-auto min-h-[100vh] mt-[20vh]">
-        <div class="max-w-screen-xl flex-wrap mx-auto">
-            <div>
-                <div class="font-['Arial Rounded MT Bold'] font-bold block pt-10 md:pt-20 ml-4 md:ml-20 text-green-950 text-4xl md:text-5xl">
-                    OnliCare Commitment to Quality <br/>and Best Service
-                </div>
-                <div class="font-['Arial Rounded MT Bold'] font-bold block pt-2 md:pt-0 ml-4 md:ml-20 text-green-800 text-lg md:text-2xl">
-                    Discover our dedication to providing exceptional
-                    <br/>healthcare across all aspects of patient care.
-                </div>
-            </div>
-
-            <div class="grid md:grid-cols-2 ml-8 mt-0">
-                <div class="p-10">
-                    <div class="text-center font-bold block text-black">Affordable Consultation</div>
-                    <div class="text-center bg-gray-300 rounded-[15px] p-5">
-                        Get answers to your health 
-                        related questions with our
-                        free sessions with healthcare experts.
+                <div class="grid md:grid-cols-2 gap-8 mt-8">
+                    <div class="p-4 bg-gray-300 rounded-lg">
+                        <div class="text-center font-bold text-black">Affordable Consultation</div>
+                        <div class="text-center mt-2">Get answers to your health related questions with our free sessions with healthcare experts.</div>
                     </div>
-                </div>
-                <div class="p-10">
-                    <div class="text-center font-bold block text-black">Affordable Service</div>
-                    <div class="text-center bg-gray-300 rounded-[15px] p-5">
-                        Access quality health care at
-                        an affordoble cost with our 
-                        Affordable Medical Services.
+                    <div class="p-4 bg-gray-300 rounded-lg">
+                        <div class="text-center font-bold text-black">Affordable Service</div>
+                        <div class="text-center mt-2">Access quality health care at an affordable cost with our Affordable Medical Services.</div>
                     </div>
                 </div>
             </div>
-
+            <div class="md:flex md:justify pl-24">
+                <img src="..\assets\Medical Clinic (Facebook Post).png" alt="" class="mt-8 md:mt-0">
+            </div>
         </div>
-        <div class="">
-            <img class="float-right" src="..\assets\Medical Clinic (Facebook Post).png" alt="">
-        </div>
-    </div>
-
+    </main>
     
+
     <!-- FOOTER -->
-    
-
-    <footer class="bg-white shadow dark:bg-green-900 bottom-0">
-        <div class="w-full max-w-screen-xl mx-auto p-4 md:py-8">
-            <div class="sm:flex sm:items-center sm:justify-between">
-                <a href="https://flowbite.com/" class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse">
-                    <img src="..\assets\onlicarelogo.svg" class="h-8" alt="Logo" />
-                    <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Flowbite</span>
-                </a>
-                <ul class="flex flex-wrap items-center mb-6 text-sm font-medium text-white-500 sm:mb-0 dark:text-white-400">
-                    <li>
-                        <a href="#" class="hover:underline me-4 md:me-6">About</a>
-                    </li>
-                    <li>
-                        <a href="#" class="hover:underline me-4 md:me-6">Privacy Policy</a>
-                    </li>
-                    <li>
-                        <a href="#" class="hover:underline me-4 md:me-6">Licensing</a>
-                    </li>
-                    <li>
-                        <a href="#" class="hover:underline">Contact</a>
-                    </li>
-                </ul>
-            </div>
-            <hr class="my-6 border-yellow-200 sm:mx-auto dark:border-yellow-700 lg:my-8" />
-            <span class="block text-sm text-white-500 sm:text-center dark:text-white-400">© 2023 <a href="#" class="hover:underline">OnliCare™</a>. All Rights Reserved.</span>
+    <footer class="bg-white shadow-md dark:bg-green-900">
+        <div class="max-w-screen-xl mx-auto p-4 md:p-8 flex flex-col md:flex-row items-center justify-between">
+            <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse mb-4 md:mb-0">
+                <img src="..\assets\onlicarelogo.svg" class="h-8" alt="Logo">
+                <span class="text-2xl font-semibold whitespace-nowrap dark:text-white">OnliCare</span>
+            </a>
+            <ul class="flex flex-wrap justify-center md:justify-end items-center space-x-4">
+                <li>
+                    <a href="#" class="hover:underline">About</a>
+                </li>
+                <li>
+                    <a href="#" class="hover:underline">Privacy Policy</a>
+                </li>
+                <li>
+                    <a href="#" class="hover:underline">Licensing</a>
+                </li>
+                <li>
+                    <a href="#" class="hover:underline">Contact</a>
+                </li>
+            </ul>
         </div>
+        <hr class="my-6 border-yellow-200 dark:border-yellow-700">
+        <span class="block text-sm text-gray-500 text-center dark:text-gray-400">© 2023 <a href="#" class="hover:underline">OnliCare™</a>. All Rights Reserved.</span>
     </footer>
-
 
 </body>
 </html>
