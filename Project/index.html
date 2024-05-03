@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OnliCare</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- HUMBRUGER -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <script src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons.js"></script>
+    <link rel="stylesheet" href="output.css">
 
 </head>
 <body class="bg-white">
@@ -21,26 +22,26 @@
                 </a>
 
                 <!-- MENU BAR -->
-                <div class="nav-links duration-500 md:static absolute bg-green-900 md:min-h-fit min-h-[60vh] left-0 top-[-100%] md:w-auto w-full flex items-center pl-5">
-                    <ul class="flex md:flex-row flex-col md:items-center md:gap-[4vw] gap-8">
+                <div class="nav-links duration-500 md:static absolute bg-green-900 md:bg-transparent md:min-h-fit max-h-2 left-0 top-[-100%] md:w-auto w-full flex items-center pl-5">
+                    <ul class="mx-auto md:ml-0 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-[2vw]">
                         <li>
-                            <a href="#" onclick="onToggleMenu(this); scrollToContent('home')" class="block py-2 px-3 bg-green-700 text-white rounded hover:bg-transparent hover:text-green-700 dark:text-white dark:hover:text-yellow-300">Home</a>
+                            <a href="#" onclick="onToggleMenu(this); scrollToContent('home')" class="block py-2 px-3 text-white rounded hover:bg-transparent hover:text-green-700 dark:text-white dark:hover:text-yellow-300">Home</a>
                         </li>
                         <li>
-                            <a href="#" onclick="onToggleMenu(this); scrollToContent('about-us')" class="block py-2 px-3 rounded hover:bg-yellow-100 hover:text-green-700 dark:text-white dark:hover:text-yellow-500 dark:hover:bg-green-700 dark:hover:text-white">About</a>
+                            <a href="#" onclick="onToggleMenu(this); scrollToContent('about-us')" class="block py-2 px-3 rounded  hover:text-green-700 dark:text-white dark:hover:text-yellow-500 dark:hover:text-white">About</a>
                         </li>
                         <li>
-                            <a href="#" onclick="onToggleMenu(this); scrollToContent('services')" class="block py-2 px-3 text-yellow-900 rounded hover:bg-yellow-100 hover:text-green-700 dark:text-white dark:hover:text-yellow-500 dark:hover:bg-green-700 dark:hover:text-white">Services</a>
+                            <a href="#" onclick="onToggleMenu(this); scrollToContent('services')" class="block py-2 px-3 text-yellow-900 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500 dark:hover:text-white">Services</a>
                         </li>
                         <li>
-                            <a href="user/login.html" class="block py-2 px-3 bg-yellow-600 text-yellow-900 rounded hover:bg-yellow-500 hover:text-green-800 dark:text-black dark:hover:text-green-800 dark:hover:bg-yellow-400 dark:hover:text-green-900">Log in</a>
+                            <a href="user/login.html" class="block py-2 px-3 bg-yellow-600 text-yellow-900 rounded hover:text-green-800 dark:text-black dark:hover:text-green-800 dark:hover:text-green-900">Log in</a>
                         </li>
                         <li>
-                            <a href="user/signup.html" class="block py-2 px-3 bg-yellow-600 text-yellow-900 rounded hover:bg-yellow-500 hover:text-green-800 dark:text-black dark:hover:text-green-800 dark:hover:bg-yellow-400 dark:hover:text-green-900">Sign up</a>
+                            <a href="user/signup.html" class="block py-2 px-3 bg-yellow-600 text-yellow-900 rounded hover:text-green-800 dark:text-black dark:hover:text-green-800 dark:hover:text-green-900">Sign up</a>
                         </li>
                     </ul>
-                    
                 </div>
+                
                 <ion-icon onclick="onToggleMenu(this)" name="menu" class="text-3xl cursor-pointer md:hidden"></ion-icon>
             </div>
         </nav>
@@ -50,7 +51,7 @@
  <main class="bg-gray-100 p-20 pl-24 ">
 
         <!-- HOME -->
-        <div class="container mx-auto grid md:grid-cols-2 min-h-screen" id="home">
+        <div class="container mx-auto grid md:grid-cols-2 min-h-2" id="home">
             <div class="max-w-screen-xl mx-auto flex flex-col justify-center">
                 <div class="text-green-950 text-4xl md:text-5xl font-bold leading-tight">OnliCare Commitment to Quality <br class="hidden md:inline">and Best Service</div>
                 <div class="mt-2 md:mt-0 text-green-800 text-lg md:text-2xl font-bold">Discover our dedication to providing exceptional<br class="hidden md:inline"> healthcare across all aspects of patient care.</div>
@@ -67,7 +68,7 @@
                 </div>
             </div>
             <div class="md:flex md:justify-center md:pl-8 lg:pl-0">
-                <img src="..\assets\Medical Clinic (Facebook Post).png" alt="" class="w-full h-auto md:w-auto md:h-[80vh] lg:h-[100vh]">
+                <img src="..\assets\Medical Clinic (Facebook Post).png" alt="" class="object-contain w-full h-auto md:w-auto md:h-[80vh] lg:h-[100vh]">
             </div>
         </div>
         
@@ -76,12 +77,16 @@
         <!-- ABOUT US -->
         <div class="container mx-auto grid md:grid-cols-2" id="about-us">
             <div class="md:flex md:justify-center md:pl-8 lg:pl-0">
-                <img src="..\assets\Blue Simple Online Doctor Consultations Instagram Post (1).png" alt="" class="scale-x-[-1] w-full h-auto md:w-auto md:h-[80vh]">
+                <img src="..\assets\Blue Simple Online Doctor Consultations Instagram Post (1).png" alt="" class="top-0 scale-x-[-1] object-contain w-full h-auto md:w-auto md:h-[80vh] lg:h-[100vh]">
             </div>
-            <div class="md:pt-24 md:pl-6 lg:pl-0">
-                <div class="text-green-950 text-2xl md:text-5xl font-bold leading-tight">About Us</div>
-                <div class="mt-2 md:mt-4 text-green-800 text-lg md:text-xl lg:text-2xl font-bold">OnliCare is an intuitive and easy-to-use medical hospital management system ideal for healthcare professionals at hospitals and private practices.</div>
-            </div>
+            <div class="md:pt-24 md:pl-6 lg:pl-0 flex flex-col items-center justify-center h-full">
+  
+                <div>
+                  <div class="text-green-950 text-2xl md:text-5xl font-bold leading-tight">About Us</div>
+                  <div class="mt-2 md:mt-4 text-green-800 text-lg md:text-xl lg:text-2xl font-bold">OnliCare is an intuitive and easy-to-use medical hospital management system ideal for healthcare professionals at hospitals and private practices.</div>
+                </div>
+              
+              </div>
         </div>
         
         <hr class="h-px my-8 bg-gray-200 border-2 dark:bg-gray-700">
@@ -129,19 +134,19 @@
                 </div>
             </div>
             <div class="md:flex md:justify-center md:pl-8 lg:pl-0">
-                <form class="w-full max-w-lg">
+                <form class="w-full max-w-lg border-gray-300 border-2 p-5 rounded-lg">
                     <div class="flex flex-wrap -mx-3 mb-6">
                         <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                             <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                                 First Name
                             </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" id="grid-first-name" type="text" placeholder="Emman">
+                            <input class="border-gray-300 appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" id="grid-first-name" type="text" placeholder="Emman">
                         </div>
                         <div class="w-full md:w-1/2 px-3">
                             <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-last-name">
                                 Last Name
                             </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" id="grid-last-name" type="text" placeholder="manloloko">
+                            <input class="border-gray-300 appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" id="grid-last-name" type="text" placeholder="manloloko">
                         </div>
                     </div>
                     <div class="flex flex-wrap -mx-3 mb-6">
@@ -149,7 +154,7 @@
                             <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-email">
                                 Email
                             </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" id="grid-email" type="email" placeholder="Emmmanloloko@example.com">
+                            <input class="border-gray-300 appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" id="grid-email" type="email" placeholder="Emmmanloloko@example.com">
                         </div>
                     </div>
                     <div class="flex flex-wrap -mx-3 mb-6">
@@ -157,7 +162,7 @@
                             <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-message">
                                 Message
                             </label>
-                            <textarea class=" no-resize appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white h-48 resize-none" id="grid-message"></textarea>
+                            <textarea class="border-gray-300 border-2 no-resize appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white h-48 resize-none" id="grid-message"></textarea>
                         </div>
                     </div>
                     <div class="md:flex md:items-center">
