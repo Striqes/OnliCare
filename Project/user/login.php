@@ -1,8 +1,43 @@
+<?php
+session_start();
+include 'core/connection.php';
+$conn = new mysqli("localhost", "root", "", "onlicare");
+
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = $_POST["email"];
+    $password = $_POST["password"];
+  
+    $sql = "SELECT * FROM user WHERE Email = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+  
+    // Verify password
+    if (password_verify($password, $user['Password'])) {
+      // Password is correct, start a new session and save the user's email to the session
+      session_start();
+      $_SESSION['email'] = $email;
+      header("Location: patient\patientindex.php");
+      exit();
+    } else {
+      // Password is incorrect
+      echo "The password you entered was not valid.";
+    }
+  }
+  
+  $conn->close();
+  ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="..\output.css">
     <title>Log in</title>
 </head>
@@ -17,7 +52,7 @@
         </div>
         <div class="bg-white w-5/6 md:w-3/4 lg:w-2/3 xl:w-[500px] 2xl:w-[500] mt-8 mx-auto px-16 py-8 rounded-lg shadow-2xl">
             <h2 class="text-center text-2xl font-bold tracking-wide text-gray-800">Log in</h2>
-            <form class="my-8 text-sm">
+            <form class="my-8 text-sm" method = "POST">
 
                 <div class="flex items-center justify-between">
                     <div class="w-full h-[1px] bg-gray-300"></div>
@@ -63,9 +98,5 @@
         </div>
     </div>
 </div>
-
-    
-    
-   
 </body>
 </html>
