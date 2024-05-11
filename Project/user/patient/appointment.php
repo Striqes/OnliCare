@@ -7,8 +7,20 @@ if ($conn -> connect_errno) {
   exit();
 }
 
-?>
+function getDoctorsByDepartment($department_id) {
+    global $conn;
+    $sql = "SELECT doctor.Doctor_ID, user.First_Name FROM doctor JOIN user ON doctor.User_ID = user.UserID WHERE doctor.Department_ID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $department_id);
+    $stmt->execute();
 
+    $result = $stmt->get_result();
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+$department_id = 1; // replace this with the actual department id
+$doctors = getDoctorsByDepartment($department_id);
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -48,25 +60,46 @@ if ($conn -> connect_errno) {
         <select name="select_department" id="department" onchange="updateDoctors(this.value)" class="block w-1/2 rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm">
             <option class="font-semibold text-slate-300">Please Select department</option>
             <?php
-            // Assuming you have a valid connection $conn
+            $sql = "SELECT department_name FROM department";
+            $result = $conn->query($sql);
 
-            $query = "SHOW COLUMNS FROM department LIKE 'department_name'";
-            $result = $conn->query($query);
-            $row = $result->fetch_assoc();
-
-            $type = $row['Type'];
-            preg_match("/^enum\(\'(.*)\'\)$/", $type, $matches);
-            $enum = explode("','", $matches[1]);
-
-            foreach ($enum as $value) {
-                echo "<option value='" . $value . "'>" . $value . "</option>";
+            if ($result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                    echo '<option value="'.$row['department_name'].'">'.$row['department_name'].'</option>';
+                }
+            } else {
+                echo '<option>No departments found</option>';
             }
             ?>
         </select>
         <select name="select_doctor" id="doctor" class="block w-1/2 rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm">
-            <option class="font-semibold text-slate-300">Please Select doctor</option>
+        <option class="font-semibold text-slate-300">Please Select doctor</option>
         </select>
     </div>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+    $(document).ready(function(){
+        $("#department").change(function(){
+            var deptName = $(this).val();
+            $.ajax({
+                url: '../core/get_doctors.php',
+                type: 'post',
+                data: {department:deptName},
+                dataType: 'json',
+                success:function(response){
+                    var len = response.length;
+                    $("#doctor").empty();
+                    for( var i = 0; i<len; i++){
+                        var name = "Dr. " + response[i]['First_Name'] + " " + response[i]['Last_Name'];
+                        var id = response[i]['Doctor_ID'];
+                        $("#doctor").append("<option value='"+id+"'>"+name+"</option>");
+                    }
+                }
+            });
+        });
+    });
+    </script>
 
         <div class="my-6 flex gap-4">
         <input type="date" name="date" id="date" class="block w-1/2 rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm">
