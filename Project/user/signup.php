@@ -18,12 +18,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST["password"];
     $password_confirmation = $_POST["password_confirmation"];
     $user_type = "Patient"; 
+    $country = $_POST["country"];
+    $province = $_POST["province"];
+    $city = $_POST["city"];
+    $barangay = $_POST["barangay"];
+    $zipcode = $_POST["zipcode"];
 
-    // Check if passwords match
-    if ($password !== $password_confirmation) {
-        echo "Passwords do not match.";
-        exit();
-    }
+    // Hash the password
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
     // Check if email already exists
     $sql = "SELECT * FROM user WHERE Email = ?";
@@ -37,21 +39,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $stmt->close();
 
-    // Hash the password
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    // Prepare and execute address insertion
+    $sql_address = "INSERT INTO address (County, Province, City, Baranggay, Zip_Code) VALUES (?, ?, ?, ?, ?)";
+    $stmt_address = $conn->prepare($sql_address);
+    $stmt_address->bind_param("sssss", $country, $province, $city, $barangay, $zipcode);
 
-    $sql = "INSERT INTO user (First_Name, Middle_Initial, Last_Name, Email, UserType, Password) VALUES (?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssss", $first_name, $middle_initial, $last_name, $email, $user_type, $hashed_password);
+    // Execute address insertion
+    if (!$stmt_address->execute()) {
+        echo "Error inserting address: " . $stmt_address->error;
+        exit();
+    }
 
-    if ($stmt->execute()) {
+    // Get the ID of the inserted address
+    $address_id = $stmt_address->insert_id;
+
+    // Prepare and execute user insertion
+    $sql_user = "INSERT INTO user (First_Name, Middle_Initial, Last_Name, Email, Address_ID, UserType, Password) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $stmt_user = $conn->prepare($sql_user);
+    $stmt_user->bind_param("ssssiss", $first_name, $middle_initial, $last_name, $email, $address_id, $user_type, $hashed_password);
+
+    // Execute user insertion
+    if (!$stmt_user->execute()) {
+        echo "Error inserting user: " . $stmt_user->error;
+        exit();
+    }
+
+    // Insert patient
+    $user_id = $stmt_user->insert_id; // Get the ID of the inserted user
+
+    $sql_patient = "INSERT INTO patient (User_ID) VALUES (?)";
+    $stmt_patient = $conn->prepare($sql_patient);
+    $stmt_patient->bind_param("i", $user_id); // Bind the user ID for the patient
+
+    // Execute patient insertion
+    if ($stmt_patient->execute()) {
         header('Location: ..\index.php');
         exit();
     } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+        echo "Error inserting Patient: " . $stmt_patient->error;
+        exit();
     }
 
-    $stmt->close();
+    $stmt_address->close();
+    $stmt_user->close();
+    $stmt_patient->close();
+
 }
 
 $conn->close();
@@ -79,29 +111,56 @@ $conn->close();
                     <h2 class="text-center text-2xl font-bold tracking-wide text-gray-800">Sign Up</h2>
                     <p class="text-center text-sm text-gray-600 mt-2">Already have an account? <a href="login.html" class="text-blue-600 hover:text-blue-700 hover:underline" title="Sign In">Sign in here</a></p>
 
-                    <form class="my-8 text-sm" method = "post">
+                    <form class="my-8 text-sm" method = "post" onsubmit="return validateForm()">
                         <div class="flex flex-col my-4">
-                            <label for="name" class="text-gray-700">Name</label>
-                            <input type="text" name="name" id="name" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your name">
+                            <label for="name" class="text-gray-700">First Name</label>
+                            <input type="text" name="name" id="name" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your name" required>
                         </div>
                         <div class="flex flex-col my-4">
-                            <label for="middleName" class="text-gray-700">middleName</label>
-                            <input type="text" name="middleName" id="middleName" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your middleName">
+                            <label for="middleName" class="text-gray-700">Middle Initial</label>
+                            <input type="text" name="middleName" id="middleName" maxlength="1" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your Middle Initial" required>
                         </div>
                         <div class="flex flex-col my-4">
                             <label for="LastName" class="text-gray-700">LastName</label>
-                            <input type="text" name="LastName" id="LastName" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your Last Name">
+                            <input type="text" name="LastName" id="LastName" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your Last Name" required>
 
 
                         <div class="flex flex-col my-4">
                             <label for="email" class="text-gray-700">Email Address</label>
-                            <input type="email" name="email" id="email" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your email">
+                            <input type="email" name="email" id="email" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your email" required>
                         </div>
                         
+                        <div class="flex flex-col md:flex-row justify-between my-4">
+                            <div class="flex flex-col mr-4" style="width: 48%;">
+                                <label for="country" class="text-gray-700">Country</label>
+                                <input type="text" name="country" id="country" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900 w-full" placeholder="Enter your country" required>
+                            </div>
+                            <div class="flex flex-col ml-4" style="width: 48%;">
+                                <label for="province" class="text-gray-700">Province</label>
+                                <input type="text" name="province" id="province" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900 w-full" placeholder="Enter your province" required>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col md:flex-row justify-between my-4">
+                            <div class="flex flex-col mr-4" style="width: 48%;">
+                                <label for="city" class="text-gray-700">City</label>
+                                <input type="text" name="city" id="city" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your city" required>
+                            </div>
+                            <div class="flex flex-col" style="width: 48%;">
+                                <label for="barangay" class="text-gray-700">Barangay</label>
+                                <input type="text" name="barangay" id="barangay" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your barangay" required>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col my-4">
+                            <label for="zipcode" class="text-gray-700">Zipcode</label>
+                            <input type="text" name="zipcode" id="zipcode" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your zipcode" required>
+                        </div>
+
                         <div class="flex flex-col my-4">
                             <label for="password" class="text-gray-700">Password</label>
                             <div x-data="{ show: false }" class="relative flex items-center mt-2">
-                                <input :type=" show ? 'text': 'password' " name="password" id="password" class="flex-1 p-2 pr-10 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your password" type="password">
+                                <input :type=" show ? 'text': 'password' " name="password" id="password" class="flex-1 p-2 pr-10 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your password" type="password" required>
                                 <button @click="show = !show" type="button" class="absolute right-2 bg-transparent flex items-center justify-center text-gray-700">
                                     <svg x-show="!show" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
 
@@ -113,7 +172,7 @@ $conn->close();
                         <div class="flex flex-col my-4">
                             <label for="password_confirmation" class="text-gray-700">Password Confirmation</label>
                             <div x-data="{ show: false }" class="relative flex items-center mt-2">
-                                <input :type=" show ? 'text': 'password' " name="password_confirmation" id="password_confirmation" class="flex-1 p-2 pr-10 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your password again" type="password">
+                                <input :type=" show ? 'text': 'password' " name="password_confirmation" id="password_confirmation" class="flex-1 p-2 pr-10 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your password again" type="password" required>
                                 <button @click="show = !show" type="button" class="absolute right-2 bg-transparent flex items-center justify-center text-gray-700">
                                     <svg x-show="!show" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
 
@@ -134,5 +193,19 @@ $conn->close();
                 </div>
             </div>
         </div>
+
+    <script>
+        function validateForm() {
+            var password = document.getElementById("password").value;
+            var password_confirmation = document.getElementById("password_confirmation").value;
+
+            if (password !== password_confirmation) {
+                alert("Passwords do not match");
+                return false; // Prevent form submission
+            }
+            return true; // Allow form submission
+        }
+    </script>
+
 </body>
 </html>
