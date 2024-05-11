@@ -3,35 +3,40 @@ session_start();
 include 'core/connection.php';
 $conn = new mysqli("localhost", "root", "", "onlicare");
 
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST["email"];
     $password = $_POST["password"];
-  
+
     $sql = "SELECT * FROM user WHERE Email = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
-  
+
     // Verify password
     if (password_verify($password, $user['Password'])) {
-      // Password is correct, start a new session and save the user's email to the session
-      session_start();
-      $_SESSION['email'] = $email;
-      header("Location: patient\patientindex.php");
-      exit();
+        $_SESSION['email'] = $email;
+        $_SESSION['user_id'] = $user['UserID'];
+
+        // Check user type and redirect accordingly
+        if ($user['UserType'] == 'Doctor') {
+            header("Location: doctor\doctorindex.php");
+        } else if ($user['UserType'] == 'Patient'){
+            header("Location: patient\patientindex.php");
+        }else if ($user['UserType'] == 'Admin'){
+            header("Location: staff\admin.php");
+        }
+        exit();
     } else {
-      // Password is incorrect
-      echo "The password you entered was not valid.";
+        // Password is incorrect
+        echo "The password you entered was not valid.";
     }
-  }
-  
-  $conn->close();
-  ?>
+}
 
 
+$conn->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -82,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <p class="text-base">
                     <strong class="text-lg mb-2">First Time Here?<br/></strong>
                     For <strong >Patients and Users:<br/></strong>
-                    &ensp;Continue at <a href="signup.html" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Sign Up</a><br/><br/> 
+                    &ensp;Continue at <a href="signup.php" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Sign Up</a><br/><br/> 
                     For <strong >Doctors and Staff:<br/></strong>
                     &ensp;Request for credential via Admin<br/>
                 </p>
