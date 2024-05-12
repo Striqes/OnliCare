@@ -1,3 +1,10 @@
+<?php
+
+include 'user/core/connection.php';
+include 'user/core/sessiontimeout.php';
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +13,7 @@
     <title>OnliCare</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- HUMBRUGER -->
     <script src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> <!-- AJAX CDN -->
     <link rel="stylesheet" href="output.css">
 
 </head>
@@ -21,17 +29,19 @@
                 </a>
 
                 <!-- MENU BAR -->
-                <div class="nav-links duration-500 md:static absolute md:min-h-fit bg-green-900 max-h-[15vh] left-0 top-[-100%] md:w-auto w-full flex items-center p-5">
+                <div class="gap-8 nav-links duration-500 md:static absolute md:min-h-fit bg-green-900 max-h-[15vh] left-0 top-[-100%] md:w-auto w-full flex items-center p-5">
                     <ul class="mx-auto md:ml-0 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-[2vw]">
                         <li>
                             <a href="#" onclick="onToggleMenu(this); scrollToContent('home')" class="block py-2 px-3 text-white rounded hover:bg-transparent hover:text-green-700 dark:text-white dark:hover:text-yellow-300">Home</a>
                         </li>
                         <li>
-                            <a href="#" onclick="onToggleMenu(this); scrollToContent('about-us')" class="block py-2 px-3 rounded  hover:text-green-700 dark:text-white dark:hover:text-yellow-500">About</a>
+                            <a href="#" onclick="onToggleMenu(this); scrollToContent('about-us')" class="block py-2 px-3 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">About</a>
                         </li>
                         <li>
                             <a href="#" onclick="onToggleMenu(this); scrollToContent('services')" class="block py-2 px-3 text-yellow-900 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">Services</a>
                         </li>
+                    </ul>
+                    <ul id="loginButtons" class="mx-auto md:ml-0 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-[2vw]">
                         <li>
                             <a href="user/login.php" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Log in</a>
                         </li>
@@ -40,6 +50,7 @@
                         </li>
                     </ul>
                 </div>
+
                 
                 <ion-icon onclick="onToggleMenu(this)" name="menu" class="text-3xl cursor-pointer md:hidden"></ion-icon>
             </div>
@@ -216,10 +227,53 @@
             navLinks.classList.toggle('top-[9%]')
             // navLinks.classList.toggle('hidden');
         }
+
+        function changeLoginButtonsContent() {
+            var loginButtons = document.getElementById("loginButtons");
+            if (loginButtons) {
+                loginButtons.innerHTML = `
+                    <li>
+                        <a href="user/profile.php" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Profile</a>
+                    </li>
+                    <li>
+                        <button type="submit" onclick="logout()" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Log out</button>
+                    </li>
+                `;
+            }
+        }
+
+        function logout() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "user/core/logout.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    console.log(xhr.responseText);
+                }
+            };
+            xhr.send("action=logout");
+            location.reload();
+        }
+
     </script>
 
-    
+<?php 
+    if(!$_SESSION["user_id"]){
+        // nothing happens
+    } else {
+        $user_id = $_SESSION['user_id']; 
+        $query = "SELECT First_Name, Middle_Initial, Last_Name FROM user WHERE UserID = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("i", $user_id);
 
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+
+        echo '<script>changeLoginButtonsContent();</script>';
+    }
+
+?>
 
 </body>
 </html>
