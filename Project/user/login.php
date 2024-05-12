@@ -18,6 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (password_verify($password, $user['Password'])) {
         $_SESSION['email'] = $email;
         $_SESSION['user_id'] = $user['UserID'];
+        $_SESSION['UserType'] = $user['UserType'];
 
         // Check user type and redirect accordingly
         if ($user['UserType'] == 'Doctor') {
