@@ -1,4 +1,6 @@
 <?php
+
+session_start();
 // Set session timeout duration
 $timeout_duration = 1800;  // 1800 seconds = 30 minutes
 
@@ -22,8 +24,7 @@ $_SESSION['timeout'] = time();
 // Check if user is logged in
 if (!isset($_SESSION['user_id']) && !endsWith($_SERVER['REQUEST_URI'], 'index.php')) {
   // Redirect to login page
-  header('Location: ../login.php');
-  exit;
+  exit($_SESSION['user_id']);
 }
 
 // Check if user is logged in
