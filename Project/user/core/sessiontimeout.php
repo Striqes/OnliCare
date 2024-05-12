@@ -24,7 +24,8 @@ $_SESSION['timeout'] = time();
 // Check if user is logged in
 if (!isset($_SESSION['user_id']) && !endsWith($_SERVER['REQUEST_URI'], 'index.php')) {
   // Redirect to login page
-  exit($_SESSION['user_id']);
+  $absolutePath = $root . "/onlicare/Project/user/login.php";
+  header("Location: $absolutePath");
 }
 
 // Check if user is logged in
