@@ -1,12 +1,12 @@
-    <?php
-include '../core/sessiontimeout.php';
-
+<?php
+    include '../core/sessiontimeout.php';
     include '../core/connection.php';
+
     $conn = new mysqli("localhost","root","","onlicare");
 
     if ($conn -> connect_errno) {
-      echo "Failed to connect to MySQL: " . $conn -> connect_error;
-      exit();
+    echo "Failed to connect to MySQL: " . $conn -> connect_error;
+    exit();
     }
 
     // Check if the user is logged in
@@ -14,33 +14,38 @@ include '../core/sessiontimeout.php';
         exit('User is not logged in.');
     }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST['select_doctor']) && isset($_POST['date']) && isset($_POST['textarea'])) {
-        $user_id = $_SESSION['user_id'];
-        $doctor_id = $_POST['select_doctor'];
-        $date = $_POST['date'];
-        $message = $_POST['textarea'];
-
-        if (empty($doctor_id) || empty($date) || empty($message)) {
-            exit('All form fields are required.');
-        }
-
-       
-        $sql = "INSERT INTO appointment (Doctor_ID, Patient_ID, date, Status) VALUES (?, ?, ?, 'pending')";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iis", $doctor_id, $user_id, $date);
-        $stmt->execute();
-
-        if ($stmt->affected_rows === 0) {
-            exit('Failed to make an appointment.');
-        } else {
-            echo 'Appointment successfully made.';
-        }
-    } else {
-        echo 'All form fields are required.';
+    if($_SESSION['UserType'] == 'Doctor'){
+        header("Location: ..\patient\appointment.php");
     }
-}
-    ?>
+
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        if (isset($_POST['select_doctor']) && isset($_POST['date']) && isset($_POST['textarea'])) {
+            $user_id = $_SESSION['user_id'];
+            
+
+            $doctor_id = $_POST['select_doctor'];
+            $date = $_POST['date'];
+            $message = $_POST['textarea'];
+
+            if (empty($doctor_id) || empty($date) || empty($message)) {
+                exit('All form fields are required.');
+            }
+        
+            $sql = "INSERT INTO appointment (Doctor_ID, Patient_ID, date, Status) VALUES (?, ?, ?, 'pending')";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("iis", $doctor_id, $user_id, $date);
+            $stmt->execute();
+
+            if ($stmt->affected_rows === 0) {
+                exit('Failed to make an appointment.');
+            } else {
+                echo 'Appointment successfully made.';
+            }
+        } else {
+            echo 'All form fields are required.';
+        }
+    }
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -120,7 +125,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <input type="date" name="date" class="block w-full rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm" required>
     </div>
         <div class="">
-        <textarea name="textarea" id="text" cols="30" rows="10" class="mb-10 h-40 w-full resize-none rounded-md border border-slate-300 p-5 font-semibold text-gray-300">Message</textarea>
+        <textarea name="textarea" id="text" cols="30" rows="10" class="mb-10 h-40 w-full resize-none rounded-md border border-slate-300 p-5 font-semibold text-black" placeholder="Message"></textarea>
         </div>
         <div class="text-center">
         <button type="submit" class="rounded-lg bg-blue-700 px-8 py-5 text-sm font-semibold text-white">Book Appointment</button>
