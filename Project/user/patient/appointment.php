@@ -5,8 +5,7 @@
     $conn = new mysqli("localhost","root","","onlicare");
 
     if ($conn -> connect_errno) {
-    echo "Failed to connect to MySQL: " . $conn -> connect_error;
-    exit();
+    exit('Failed to connect to MySQL: ' . $conn -> connect_error);
     }
 
     // Check if the user is logged in
@@ -15,7 +14,7 @@
     }
 
     if($_SESSION['UserType'] == 'Doctor'){
-        header("Location: ..\patient\appointment.php");
+        header("Location: ..\doctor\doctorindex.php");
     }
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
