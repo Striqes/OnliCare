@@ -7,5 +7,5 @@ if ($conn -> connect_errno) {
   exit();
 }
 
-
+session_start();
 ?>

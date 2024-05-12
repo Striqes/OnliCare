@@ -1,6 +1,4 @@
 <?php
-session_start();
-
 // Set session timeout duration
 $timeout_duration = 1800;  // 1800 seconds = 30 minutes
 
