@@ -1,14 +1,6 @@
 <?php
 session_start();
 include 'core/connection.php';
-$conn = new mysqli("localhost", "root", "", "onlicare");
-
-
-
-// Check connection
-if ($conn->connect_error) {
-  die("Connection failed: " . $conn->connect_error);
-}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $first_name = $_POST["name"];

@@ -1,7 +1,6 @@
 <?php
 session_start();
 include 'core/connection.php';
-$conn = new mysqli("localhost", "root", "", "onlicare");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST["email"];
