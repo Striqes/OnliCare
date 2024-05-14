@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
 
     // Prepare and execute address insertion
-    $sql_address = "INSERT INTO address (County, Province, City, Baranggay, Zip_Code) VALUES (?, ?, ?, ?, ?)";
+    $sql_address = "INSERT INTO address (Country, Province, City, Baranggay, Zip_Code) VALUES (?, ?, ?, ?, ?)";
     $stmt_address = $conn->prepare($sql_address);
     $stmt_address->bind_param("sssss", $country, $province, $city, $barangay, $zipcode);
 
