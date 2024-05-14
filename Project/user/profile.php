@@ -84,7 +84,7 @@ if (!isset($_SESSION['user_id'])) {
                 $result = $stmt->get_result();
                 $user = $result->fetch_assoc();
 
-                $name = strtoupper($user['First_Name'] . " " . $user['Middle_Initial'] . ". " . $user['Last_Name']);
+                $name = $user['First_Name'] . " " . $user['Middle_Initial'] . ". " . $user['Last_Name'];
                 $email = $user['Email'];
                 $addressid = $user['Address_ID'];
 
@@ -100,6 +100,11 @@ if (!isset($_SESSION['user_id'])) {
                     $Full_Address = $address['Baranggay'] . ", " . $address['City'] . ", " . $address['Province'] . ", " . $address['Zip_Code'] . ", " . $address['Country'];
                 } else {
                     $Full_Address = "Not Available";
+                    $address['Baranggay'] = "Baranggay";
+                    $address['City'] = "City";
+                    $address['Province'] = "Province";
+                    $address['Zip_Code'] = "Zip Code";
+                    $address['Country'] = "Country";
                 }
 
                 
@@ -107,9 +112,7 @@ if (!isset($_SESSION['user_id'])) {
             ?>
 
             <div class="flex items-center space-x-4">
-                <!-- User Details -->
                 <div class="flex-1">
-                    <!-- Display user details fetched from PHP -->
                     <h2 class="text-2xl font-semibold text-gray-800">Name</h2>
                     <p class="text-gray-600"><?php echo $name ?></p>
                     
@@ -120,11 +123,48 @@ if (!isset($_SESSION['user_id'])) {
                     <p class="text-gray-600"><?php echo $Full_Address ?></p>
                 </div>
                 <div>
-                    <a href="update.php?type=name" class="bg-green-800 hover:text-yellow-50 text-yellow-400 font-bold py-2 px-7 rounded mb-4 block">Update Name</a>
-                    <a href="update.php?type=email" class="bg-green-800 hover:text-yellow-50 text-yellow-400 font-bold py-2 px-7 rounded mb-4 block">Update Email</a>
-                    <a href="update.php?type=address" class="bg-green-800 hover:text-yellow-50 text-yellow-400 font-bold py-2 px-6 rounded block">Update Address</a>
+                    <a onclick="showUpdate('updateName')" class="bg-green-800 hover:text-yellow-50 text-yellow-400 font-bold py-2 px-7 rounded mb-4 block cursor-pointer text-center">Update Name</a>
+                    <a onclick="showUpdate('updateEmail')" class="bg-green-800 hover:text-yellow-50 text-yellow-400 font-bold py-2 px-7 rounded mb-4 block cursor-pointer text-center">Update Email</a>
+                    <a onclick="showUpdate('updateAddress')" class="bg-green-800 hover:text-yellow-50 text-yellow-400 font-bold py-2 px-7 rounded mb-4 block cursor-pointer text-center">Update Address</a>
                 </div>
             </div>
+            
+            <div id="update" class="hidden">
+                <hr class="h-px my-8 bg-gray-200 border-2 dark:bg-gray-700">
+                <div class="flex items-center space-x-4">
+                    <div class="flex-1">
+
+                        <div id="updateName" class="hidden">
+                            <h2 class="text-2xl font-semibold text-gray-800 mb-2">Update Name</h2>
+                                <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $user["First_Name"] ?>"></input>
+                                <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $user["Middle_Initial"] ?>"></input>
+                                <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $user["Last_Name"] ?>"></input>
+
+                        </div>
+                        
+                        <div id="updateEmail" class="hidden">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-2">Update Email</h2>
+                            <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2" placeholder="<?php echo $email ?>"></input>
+                        </div>
+                        
+                        <div id="updateAddress" class="hidden">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-2">Update Address</h2>
+                            <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['Baranggay'] ?>"></input>
+                            <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['City'] ?>"></input>
+                            <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['Province'] ?>"></input>
+                            <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['Zip_Code'] ?>"></input>
+                            <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['Country'] ?>"></input>
+                    
+                        </div>
+                        
+                    </div>
+
+                    <div>
+                        <a onclick="" class="bg-green-800 hover:text-yellow-50 text-yellow-400 font-bold py-2 px-7 rounded mb-4 block cursor-pointer text-center">Confirm Update</a>
+                    </div>
+                </div>
+            </div>
+            
 
         </div>
 
@@ -151,6 +191,38 @@ if (!isset($_SESSION['user_id'])) {
 
     <!-- ScrollDown Script -->
     <script>
+
+        function showUpdate(update) {
+            const updateContainer = document.getElementById('update');
+            const sections = ['updateName', 'updateEmail', 'updateAddress'];
+
+            // Check if the selected section is currently visible
+            const selectedSection = document.getElementById(update);
+            const isSelectedSectionVisible = !selectedSection.classList.contains('hidden');
+
+            // Hide all sections initially
+            sections.forEach(section => {
+                document.getElementById(section).classList.add('hidden');
+            });
+
+            // Toggle the visibility of the main container based on the selected section visibility
+            if (isSelectedSectionVisible) {
+                // Hide the main container if the selected section is already visible
+                updateContainer.classList.add('hidden');
+            } else {
+                // Show the selected section and the main container if the selected section is not visible
+                selectedSection.classList.remove('hidden');
+                updateContainer.classList.remove('hidden');
+            }
+        }
+
+        function toggleVisibility(id) {
+            const element = document.getElementById(id);
+            element.classList.toggle('hidden');
+        }
+
+
+
         function scrollToContent(id){
             const element = document.getElementById(id);
             element.scrollIntoView({ behavior: "smooth"})
