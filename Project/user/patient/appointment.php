@@ -8,7 +8,7 @@
     }
 
     if($_SESSION['UserType'] == 'Doctor'){
-        header("Location: ..\doctor\doctorindex.php");
+        header("Location: $indexPath");
     }
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {

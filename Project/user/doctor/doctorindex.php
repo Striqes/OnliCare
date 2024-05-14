@@ -9,7 +9,7 @@
 
     // User Type verifcation
     if($_SESSION['UserType'] == 'Patient'){
-        header("Location: ..\patient\appointment.php");
+        header("Location: $indexPath");
     }
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {

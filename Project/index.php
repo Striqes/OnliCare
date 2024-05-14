@@ -1,8 +1,6 @@
 <?php
-
 include 'user/core/connection.php';
 include 'user/core/sessiontimeout.php';
-
 ?>
 
 <!DOCTYPE html>

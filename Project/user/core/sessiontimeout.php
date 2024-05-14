@@ -1,6 +1,5 @@
 <?php
 
-session_start();
 // Set session timeout duration
 $timeout_duration = 1800;  // 1800 seconds = 30 minutes
 
@@ -13,7 +12,7 @@ if(isset($_SESSION['timeout'])) {
     if($session_age > $timeout_duration) {
         // Destroy the session and redirect to login
         session_destroy();
-        header('Location: ../login.php');
+        header($login);
         exit;
     }
 }
@@ -24,8 +23,7 @@ $_SESSION['timeout'] = time();
 // Check if user is logged in
 if (!isset($_SESSION['user_id']) && !endsWith($_SERVER['REQUEST_URI'], 'index.php')) {
   // Redirect to login page
-  $absolutePath = $root . "/onlicare/Project/user/login.php";
-  header("Location: $absolutePath");
+  header("Location: $login");
 }
 
 // Check if user is logged in
@@ -51,8 +49,7 @@ if (isset($_POST['logout'])) {
 
   // Destroy the session
   session_destroy();
-  $absolutePath = $root . "/onlicare/Project/index.php";
-  header("Location: $absolutePath");
+  header("Location: $indexPath");
   
 }
 

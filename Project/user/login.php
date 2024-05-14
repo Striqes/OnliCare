@@ -1,5 +1,4 @@
 <?php
-session_start();
 include 'core/connection.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -20,12 +19,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['UserType'] = $user['UserType'];
 
         // Check user type and redirect accordingly
-        if ($user['UserType'] == 'Doctor') {
-            header("Location: doctor\doctorindex.php");
-        } else if ($user['UserType'] == 'Patient'){
-            header("Location: patient\patientindex.php");
-        }else if ($user['UserType'] == 'Admin'){
-            header("Location: staff\admin.php");
+        if ($user['UserType'] == 'Admin'){
+            header("Location: $adminIndex");
+            exit;
+        } else {
+            header("Location: $indexPath");
         }
         exit();
     } else {

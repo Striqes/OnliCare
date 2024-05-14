@@ -1,9 +1,9 @@
 <?php
-session_start();
 include 'core/connection.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $first_name = $_POST["name"];
+    
     $middle_initial = $_POST["middleName"];
     $last_name = $_POST["LastName"];
     $email = $_POST["email"];

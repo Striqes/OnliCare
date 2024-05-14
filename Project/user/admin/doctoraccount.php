@@ -2,9 +2,8 @@
 include '../core/connection.php';
 include '../core/sessiontimeout.php';
 
-if($_SESSION['UserType'] != 'Admin'){
-    $absolutePath = $root . "/onlicare/Project/index.php";
-    header("Location: $absolutePath");
+if($_SESSION['UserType'] != 'Doctor'){
+    header("Location: $indexPath");
 }
 ?>
 
