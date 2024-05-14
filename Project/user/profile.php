@@ -17,6 +17,7 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- HUMBRUGER -->
     <script src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> <!-- AJAX CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../output.css">
 
 </head>
@@ -107,20 +108,22 @@ if (!isset($_SESSION['user_id'])) {
 
             <div class="flex items-center space-x-4">
                 <!-- User Details -->
-                <div>
+                <div class="flex-1">
                     <!-- Display user details fetched from PHP -->
                     <h2 class="text-2xl font-semibold text-gray-800">Name</h2>
                     <p class="text-gray-600"><?php echo $name ?></p>
+                    
                     <h2 class="text-2xl font-semibold text-gray-800">Email</h2>
-                    <p class="text-gray-600"><?php echo $email ?></</p>
+                    <p class="text-gray-600"><?php echo $email ?></p>
+                    
                     <h2 class="text-2xl font-semibold text-gray-800">Address</h2>
-                    <p class="text-gray-600"><?php echo $Full_Address ?></</p>
+                    <p class="text-gray-600"><?php echo $Full_Address ?></p>
                 </div>
-            </div>
-
-            <!-- Edit Profile Button -->
-            <div class="mt-6">
-                <a href="#" class="text-blue-600 hover:underline">Edit Profile</a>
+                <div>
+                    <a href="update.php?type=name" class="bg-green-800 hover:text-yellow-50 text-yellow-400 font-bold py-2 px-7 rounded mb-4 block">Update Name</a>
+                    <a href="update.php?type=email" class="bg-green-800 hover:text-yellow-50 text-yellow-400 font-bold py-2 px-7 rounded mb-4 block">Update Email</a>
+                    <a href="update.php?type=address" class="bg-green-800 hover:text-yellow-50 text-yellow-400 font-bold py-2 px-6 rounded block">Update Address</a>
+                </div>
             </div>
 
         </div>
