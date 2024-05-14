@@ -54,6 +54,24 @@ include 'user/core/sessiontimeout.php';
             </div>
         </nav>
     </header>
+
+    <?php 
+        if(!$_SESSION["user_id"]){
+            // nothing happens
+        } else {
+            $user_id = $_SESSION['user_id']; 
+            $query = "SELECT First_Name, Middle_Initial, Last_Name FROM user WHERE UserID = ?";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("i", $user_id);
+
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
+
+            echo '<script>changeLoginButtonsContent();</script>';
+        }
+
+    ?>
     
     <!-- CONTENT -->
  <main class="bg-gray-100 p-20 pl-24 min-h-screen">
@@ -202,7 +220,7 @@ include 'user/core/sessiontimeout.php';
             </a>
             <ul class="flex flex-wrap justify-center md:justify-end items-center space-x-4">
                 <li>
-                    <a href="index.html" onclick="scrollToContent('about-us')" class="hover:underline text-yellow-300">About</a>
+                    <a href="#" onclick="onToggleMenu(this); scrollToContent('about-us')" class="hover:underline text-yellow-300">About</a>
                 </li>
             </ul>
         </div>
@@ -212,11 +230,20 @@ include 'user/core/sessiontimeout.php';
 
     <!-- ScrollDown Script -->
     <script>
-        function scrollToContent(id){
+        function scrollToContent(id) {
             const element = document.getElementById(id);
-            element.scrollIntoView({ behavior: "smooth"})
-            
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+            }
         }
+
+        // Check for section ID in URL and scroll to it
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const hash = window.location.hash.substring(1); // Remove the '#' from the hash
+            if (hash) {
+                scrollToContent(hash);
+            }
+        });
 
         // Function for Menu Button on smaller dimension devices
         const navLinks = document.querySelector('.nav-links')
