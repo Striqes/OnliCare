@@ -56,7 +56,7 @@ include 'user/core/sessiontimeout.php';
     </header>
 
     <?php 
-        if(!$_SESSION["user_id"]){
+        if(!isset($_SESSION["user_id"])){
             // nothing happens
         } else {
             $user_id = $_SESSION['user_id']; 
