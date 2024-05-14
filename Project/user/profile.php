@@ -132,36 +132,37 @@ if (!isset($_SESSION['user_id'])) {
             <div id="update" class="hidden">
                 <hr class="h-px my-8 bg-gray-200 border-2 dark:bg-gray-700">
                 <div class="flex items-center space-x-4">
-                    <div class="flex-1">
 
+                    <div class="flex-1">
+                    <form method="POST" action="">
                         <div id="updateName" class="hidden">
                             <h2 class="text-2xl font-semibold text-gray-800 mb-2">Update Name</h2>
-                                <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $user["First_Name"] ?>"></input>
-                                <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $user["Middle_Initial"] ?>"></input>
-                                <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $user["Last_Name"] ?>"></input>
-
+                                <input type="text" name="fname" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $user["First_Name"] ?>"></input>
+                                <input type="text" name="MiddleInitial" maxlength=1 class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $user["Middle_Initial"] ?>"></input>
+                                <input type="text" name="lname" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $user["Last_Name"] ?>"></input>
                         </div>
                         
                         <div id="updateEmail" class="hidden">
                         <h2 class="text-2xl font-semibold text-gray-800 mb-2">Update Email</h2>
-                            <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2" placeholder="<?php echo $email ?>"></input>
+                            <input type="text" name="email" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $email ?>"></input>
                         </div>
                         
                         <div id="updateAddress" class="hidden">
                         <h2 class="text-2xl font-semibold text-gray-800 mb-2">Update Address</h2>
-                            <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['Baranggay'] ?>"></input>
-                            <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['City'] ?>"></input>
-                            <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['Province'] ?>"></input>
-                            <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['Zip_Code'] ?>"></input>
-                            <input type="text" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['Country'] ?>"></input>
+                            <input type="text" name="Baranggay" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['Baranggay'] ?>"></input>
+                            <input type="text" name="City" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['City'] ?>"></input>
+                            <input type="text" name="Province" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['Province'] ?>"></input>
+                            <input type="text" name="ZipCode" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['Zip_Code'] ?>"></input>
+                            <input type="text" name="Country" class="border-gray-800 border-2 rounded w-1/2 placeholder-gray-700 p-2 mb-2" placeholder="<?php echo $address['Country'] ?>"></input>
                     
                         </div>
                         
                     </div>
 
                     <div>
-                        <a onclick="" class="bg-green-800 hover:text-yellow-50 text-yellow-400 font-bold py-2 px-7 rounded mb-4 block cursor-pointer text-center">Confirm Update</a>
+                        <button id="submitInfo" class="bg-green-800 hover:text-yellow-50 text-yellow-400 font-bold py-2 px-7 rounded mb-4 block cursor-pointer text-center">Confirm Update</button>
                     </div>
+                </form> 
                 </div>
             </div>
             
@@ -192,9 +193,41 @@ if (!isset($_SESSION['user_id'])) {
     <!-- ScrollDown Script -->
     <script>
 
+        $(document).ready(function() {
+            $('#processDataBtn').click(function() {
+                $.ajax({
+                    url: '<?php echo $updateProfile ?>', // URL of your PHP file
+                    type: 'POST', // HTTP method
+                    data: { action: 'processData' }, // Data to send to the server
+                    success: function(response) { // Success callback function
+                        console.log(response); // Output response to the console
+                        alert(response); // Display response in an alert box
+                    },
+                    error: function(xhr, status, error) { // Error callback function
+                        console.error(xhr.responseText); // Log error message to the console
+                        alert('An error occurred while processing data'); // Display error message
+                    }
+                });
+            });
+        });
+
+        function updateInformation(id){
+            if(id == 'updateName'){
+                // Name update in html grab the shit from update Info DIV
+            } else if(id == 'updateEmail'){
+                // Email update in html grab the shit from update Info DIV
+            } else if(id == 'updateAddress'){
+                // Address update in html grab the shit from update Info DIV
+            }
+        }
+
         function showUpdate(update) {
             const updateContainer = document.getElementById('update');
             const sections = ['updateName', 'updateEmail', 'updateAddress'];
+
+            document.getElementById('submitInfo').onclick = function() {
+                updateInformation(update);
+            };
 
             // Check if the selected section is currently visible
             const selectedSection = document.getElementById(update);
@@ -215,13 +248,6 @@ if (!isset($_SESSION['user_id'])) {
                 updateContainer.classList.remove('hidden');
             }
         }
-
-        function toggleVisibility(id) {
-            const element = document.getElementById(id);
-            element.classList.toggle('hidden');
-        }
-
-
 
         function scrollToContent(id){
             const element = document.getElementById(id);
