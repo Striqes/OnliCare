@@ -15,6 +15,16 @@
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
     }
+
+
+    $doctor_id = $_SESSION['user_id']; // or however you get the doctor's ID
+
+    $sql = "SELECT a.AppointmentID, a.date, u.First_Name, u.Last_Name, a.Status
+    FROM appointment a
+    JOIN patient p ON a.Patient_ID = p.Patient_ID
+    JOIN user u ON p.User_ID = u.UserID
+    WHERE a.Doctor_ID = $doctor_id";
+$result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,7 +46,7 @@
         <nav class="bg-white border-b border-gray-200 dark:bg-green-900">
             <div class="max-w-screen-xl mx-auto px-4 py-6 flex items-center justify-between">
                 <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
-                    <img src="../assets/onlicarelogo.svg" class="h-10" alt="Logo" />
+                    <img src="../onlicarelogo.svg" class="h-10" alt="Logo" />
                     <span class="text-2xl font-semibold whitespace-nowrap dark:text-yellow-400">OnliCare</span>
                 </a>
 
@@ -69,6 +79,54 @@
         </nav>
     </header>
 
+<main class="bg-gray-100 p-20 pl-24 min-h-screen">
+<div class="flex flex-col">
+    <div class="-m-1.5 overflow-x-auto">
+        <div class="p-1.5 min-w-full inline-block align-middle">
+        <div class="border rounded-lg overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Appointment ID</th>
+                <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Appointment Date</th>
+                <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Patient Name</th>
+                <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                <?php
+                if ($result->num_rows > 0) {
+                    // output data of each row
+                    while($row = $result->fetch_assoc()) {
+                        echo "<tr>";
+                        echo "<td class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800'>" . $row["AppointmentID"] . "</td>";
+                        echo "<td class='px-6 py-4 whitespace-nowrap text-sm text-gray-800'>" . $row["date"] . "</td>";
+                        echo "<td class='px-6 py-4 whitespace-nowrap text-sm text-gray-800'>" . $row["First_Name"] . " " . $row["Last_Name"] . "</td>";
+                        echo "<td class='px-6 py-4 whitespace-nowrap text-sm text-gray-800'>" . $row["Status"] . "</td>"; // Added this line
+                        echo "<td class='px-6 py-4 whitespace-nowrap text-end text-sm font-medium'>";
+                       echo "<button type='button' class='inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-green-600 hover:text-green-800 disabled:opacity-50 disabled:pointer-events-none'>Approve</button>"; 
+                        echo "<button type='button' class='inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-blue-600 hover:text-blue-800 disabled:opacity-50 disabled:pointer-events-none'>Cancel</button>";
+                        
+                        echo "</td>";
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='5' class='px-6 py-4 whitespace-nowrap text-sm text-gray-800'>No appointments found</td></tr>"; // Changed colspan from 4 to 5
+                }
+                ?>
+            </tbody>
+            </table>
+        </div>
+        </div>
+    </div>
+    </div>
+
+
+
+
+    
+
     <?php 
         if(!isset($_SESSION["user_id"])){
             // nothing happens
@@ -86,9 +144,7 @@
         }
 
     ?>
-    
-    <!-- CONTENT -->
- <main class="bg-gray-100 p-20 pl-24 min-h-screen">
+
     </main>
    
 
