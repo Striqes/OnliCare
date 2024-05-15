@@ -22,8 +22,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($user['UserType'] == 'Admin'){
             header("Location: $adminIndex");
             exit;
-        } else {
-            header("Location: $indexPath");
+        } else if ($user['UserType'] == 'Doctor'){
+            header("Location: $doctorIndex");
+        }
+        else if ($user['UserType'] == 'Patient'){
+            header("Location: $patientIndex");
         }
         exit();
     } else {
