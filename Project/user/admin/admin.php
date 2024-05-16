@@ -27,7 +27,7 @@ if($_SESSION['UserType'] != 'Admin'){
         <h1 class="text-3xl text-center mb-8">Admin Panel</h1>
         <div class="grid grid-cols-1 gap-4">
             <a href="doctoraccount.php" class="block py-3 px-4 bg-green-900 text-yellow-400 text-center rounded-md hover:bg-green-600">Create a Doctor's Account</a>
-            <a href="modification.php" class="block py-3 px-4 bg-green-900 text-yellow-400 text-center rounded-md hover:bg-green-600">Modify Patient Information</a>
+            <a href="modification.php" class="block py-3 px-4 bg-green-900 text-yellow-400 text-center rounded-md hover:bg-green-600">Modify Doctor Department and Specialization</a>
         </div>
     </div>
 
