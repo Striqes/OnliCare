@@ -7,24 +7,35 @@
         exit('User is not logged in.');
     }
 
-    // User Type verifcation
-    if($_SESSION['UserType'] == 'Patient'){
+    // User Type verification
+    if ($_SESSION['UserType'] == 'Patient') {
         header("Location: $indexPath");
+        exit();
     }
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        
-    }
+    $doctor_id = $_SESSION['user_id']; // Get the doctor's ID from the session
 
+    // Retrieve the doctor's availability status
+    $availability_sql = "SELECT is_available FROM doctor WHERE Doctor_ID = ?";
+    $availability_stmt = $conn->prepare($availability_sql);
+    $availability_stmt->bind_param("i", $doctor_id);
+    $availability_stmt->execute();
+    $availability_result = $availability_stmt->get_result();
+    $availability_row = $availability_result->fetch_assoc();
+    $is_available = $availability_row['is_available'];
 
-    $doctor_id = $_SESSION['user_id']; // or however you get the doctor's ID
+    $availability_stmt->close();
 
     $sql = "SELECT a.AppointmentID, a.date, u.First_Name, u.Last_Name, a.Status
-    FROM appointment a
-    JOIN patient p ON a.Patient_ID = p.Patient_ID
-    JOIN user u ON p.User_ID = u.UserID
-    WHERE a.Doctor_ID = $doctor_id";
-$result = $conn->query($sql);
+            FROM appointment a
+            JOIN patient p ON a.Patient_ID = p.Patient_ID
+            JOIN user u ON p.User_ID = u.UserID
+            JOIN doctor d ON a.Doctor_ID = d.Doctor_ID
+            WHERE a.Doctor_ID = ? AND d.is_available = 1";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $doctor_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -32,15 +43,13 @@ $result = $conn->query($sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OnliCare</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- HUMBRUGER -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> <!-- AJAX CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="output.css">
-
 </head>
 <body class="bg-white">
-
     <!-- NAV BAR -->
     <header>
         <nav class="bg-white border-b border-gray-200 dark:bg-green-900">
@@ -72,9 +81,41 @@ $result = $conn->query($sql);
                         </li>
                     </ul>
                 </div>
-
                 
-                <ion-icon onclick="onToggleMenu(this)" name="menu" class="text-3xl cursor-pointer md:hidden"></ion-icon>
+                <label class="flex items-center relative w-max cursor-pointer select-none">
+                    <span class="text-lg font-bold mr-3 text-yellow-300">Doctor</span>
+                    <input id="toggle" type="checkbox" class="appearance-none transition-colors cursor-pointer w-14 h-7 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-blue-500 bg-<?php echo $is_available ? 'green' : 'yellow'; ?>-500" <?php echo $is_available ? 'checked' : ''; ?> />
+                    <span id="off" class="absolute font-medium text-xs uppercase right-1 text-white" style="display: <?php echo $is_available ? 'none' : 'block'; ?>;"> IN </span>
+                    <span id="on" class="absolute font-medium text-xs uppercase right-8 text-white" style="display: <?php echo $is_available ? 'block' : 'none'; ?>;"> OUT </span>
+                    <span id="circle" class="w-7 h-7 right-7 absolute rounded-full transform transition-transform bg-gray-200" style="transform: <?php echo $is_available ? 'translateX(1.75rem)' : 'translateX(0)'; ?>;"></span>
+                </label>
+                <script>
+document.getElementById('toggle').addEventListener('change', function() {
+    var toggle = document.getElementById('toggle');
+    var circle = document.getElementById('circle');
+    var onText = document.getElementById('on');
+    var offText = document.getElementById('off');
+    var doctorId = <?php echo $_SESSION['user_id']; ?>; // Get the doctor ID from PHP session
+
+    if (toggle.checked) {
+        circle.style.transform = 'translateX(1.75rem)';
+        toggle.classList.replace('bg-yellow-500', 'bg-green-500');
+        onText.style.display = 'block';
+        offText.style.display = 'none';
+    } else {
+        circle.style.transform = 'translateX(0)';
+        toggle.classList.replace('bg-green-500', 'bg-yellow-500');
+        onText.style.display = 'none';
+        offText.style.display = 'block';
+    }
+
+    // Send AJAX request to update_doctor_availability.php
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'update_doctor_availability.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send('doctor_id=' + encodeURIComponent(doctorId) + '&isAvailable=' + encodeURIComponent(toggle.checked ? 1 : 0));
+});
+</script>
             </div>
         </nav>
     </header>
@@ -96,23 +137,16 @@ $result = $conn->query($sql);
             </thead>
             <tbody class="divide-y divide-gray-200">
                 <?php
-                if ($result->num_rows > 0) {
-                    // output data of each row
-                    while($row = $result->fetch_assoc()) {
-                        echo "<tr>";
-                        echo "<td class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800'>" . $row["AppointmentID"] . "</td>";
-                        echo "<td class='px-6 py-4 whitespace-nowrap text-sm text-gray-800'>" . $row["date"] . "</td>";
-                        echo "<td class='px-6 py-4 whitespace-nowrap text-sm text-gray-800'>" . $row["First_Name"] . " " . $row["Last_Name"] . "</td>";
-                        echo "<td class='px-6 py-4 whitespace-nowrap text-sm text-gray-800'>" . $row["Status"] . "</td>"; // Added this line
-                        echo "<td class='px-6 py-4 whitespace-nowrap text-end text-sm font-medium'>";
-                       echo "<button type='button' class='inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-green-600 hover:text-green-800 disabled:opacity-50 disabled:pointer-events-none'>Approve</button>"; 
-                        echo "<button type='button' class='inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-blue-600 hover:text-blue-800 disabled:opacity-50 disabled:pointer-events-none'>Cancel</button>";
-                        
-                        echo "</td>";
-                        echo "</tr>";
-                    }
-                } else {
-                    echo "<tr><td colspan='5' class='px-6 py-4 whitespace-nowrap text-sm text-gray-800'>No appointments found</td></tr>"; // Changed colspan from 4 to 5
+                while ($row = $result->fetch_assoc()) {
+                    echo "<tr>";
+                    echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['AppointmentID']}</td>";
+                    echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['date']}</td>";
+                    echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['First_Name']} {$row['Last_Name']}</td>";
+                    echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm text-gray-800'>{$row['Status']}</td>";
+                    echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm font-medium'>";
+                    echo "<a href='#' class='text-green-500 hover:text-green-700'>Approve</a> | <a href='#' class='text-red-500 hover:text-red-700'>Decline</a>";
+                    echo "</td>";
+                    echo "</tr>";
                 }
                 ?>
             </tbody>
@@ -196,7 +230,7 @@ $result = $conn->query($sql);
             if (loginButtons) {
                 loginButtons.innerHTML = `
                     <li>
-                        <a href="../profile.php" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Profile</a>
+                        <a href="doctorprofile.php" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Profile</a>
                     </li>
                     <li>
                         <button type="submit" onclick="logout()" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Log out</button>
@@ -207,7 +241,7 @@ $result = $conn->query($sql);
 
         function logout() {
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "user/core/logout.php", true);
+            xhr.open("POST", "../core/logout.php", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4 && xhr.status === 200) {
