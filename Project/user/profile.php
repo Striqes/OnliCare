@@ -2,9 +2,9 @@
 include '../user/core/connection.php';
 include '../user/core/sessiontimeout.php';
 
-if (!isset($_SESSION['user_id'])) {
+ if (!isset($_SESSION['user_id'])) {
     exit('User is not logged in.');
-}
+} 
 
 ?>
 
@@ -45,7 +45,7 @@ if (!isset($_SESSION['user_id'])) {
                             <a href="../index.php#services" class="block py-2 px-3 text-yellow-900 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">Services</a>
                         </li>
                         <li>
-                            <a href="#  " class="block py-2 px-3 text-yellow-900 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">Make an Appointment</a>
+                            <a href="patient/appointment.php" class="block py-2 px-3 text-yellow-900 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">Make an Appointment</a>
                         </li>
                     </ul>
                     <ul id="loginButtons" class="mx-auto md:ml-0 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-[2vw]">
