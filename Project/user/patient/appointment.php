@@ -1,45 +1,56 @@
 <?php
-    include '../core/sessiontimeout.php';
-    include '../core/connection.php';
+include '../core/sessiontimeout.php';
+include '../core/connection.php';
 
-    // Check if the user is logged in
-    if (!isset($_SESSION['user_id'])) {
-        exit('User is not logged in.');
-    }
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    exit('User is not logged in.');
+}
 
-    if($_SESSION['UserType'] == 'Doctor'){
-        header("Location: $indexPath");
-    }
+if($_SESSION['UserType'] == 'Doctor'){
+    header("Location: $indexPath");
+}
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        if (isset($_POST['select_doctor']) && isset($_POST['date']) && isset($_POST['textarea'])) {
-            $user_id = $_SESSION['user_id'];
-            
-
-            $doctor_id = $_POST['select_doctor'];
-            $date = $_POST['date'];
-            $message = $_POST['textarea'];
-
-            if (empty($doctor_id) || empty($date) || empty($message)) {
-                exit('All form fields are required.');
-            }
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST['select_doctor']) && isset($_POST['date']) && isset($_POST['textarea'])) {
         
-            $sql = "INSERT INTO appointment (Doctor_ID, Patient_ID, date, Status) VALUES (?, ?, ?, 'pending')";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("iis", $doctor_id, $user_id, $date);
-            $stmt->execute();
+        $user_id = $_SESSION['user_id'];
+        $doctor_id = $_POST['select_doctor'];
+        $date = $_POST['date'];
+        $message = $_POST['textarea'];
 
-            if ($stmt->affected_rows === 0) {
-                exit('Failed to make an appointment.');
-            } else {
-                echo 'Appointment successfully made.';
-            }
-        } else {
-            echo 'All form fields are required.';
+        if (empty($doctor_id) || empty($date) || empty($message)) {
+            exit('All form fields are required.');
         }
-    }
-?>
 
+        // Get the Patient_ID using the User_ID
+        $sql_get_patient_id = "SELECT Patient_ID FROM patient WHERE User_ID = ?";
+        $stmt_get_patient_id = $conn->prepare($sql_get_patient_id);
+        $stmt_get_patient_id->bind_param("i", $user_id);
+        $stmt_get_patient_id->execute();
+        $result_get_patient_id = $stmt_get_patient_id->get_result();
+        if ($result_get_patient_id->num_rows === 0) {
+            exit('User is not a patient.');
+        }
+        $row = $result_get_patient_id->fetch_assoc();
+        $patient_id = $row['Patient_ID'];
+        $stmt_get_patient_id->close();
+    
+        $sql = "INSERT INTO appointment (Doctor_ID, Patient_ID, date, Status) VALUES (?, ?, ?,? )";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("iiss", $doctor_id, $patient_id, $date, $message);
+        $stmt->execute();
+
+        if ($stmt->affected_rows === 0) {
+            exit('Failed to make an appointment.');
+        } else {
+            echo 'Appointment successfully made.';
+        }
+    } else {
+        echo 'All form fields are required.';
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

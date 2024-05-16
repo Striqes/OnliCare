@@ -2,7 +2,7 @@
 include '../core/connection.php';
 include '../core/sessiontimeout.php';
 
-if($_SESSION['UserType'] != 'Admin'){
+if($_SESSION['UserType'] != 'Doctor'){
     header("Location: $indexPath");
 }
 ?>

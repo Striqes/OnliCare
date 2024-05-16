@@ -20,11 +20,11 @@ if(isset($_SESSION['timeout'])) {
 // Update the timeout field with the current time
 $_SESSION['timeout'] = time();
 
-// Check if user is logged in
+/* // Check if user is logged in
 if (!isset($_SESSION['user_id']) && !endsWith($_SERVER['REQUEST_URI'], 'index.php')) {
   // Redirect to login page
   header("Location: $login");
-}
+} */
 
 // Check if user is logged in
 if (isset($_SESSION['user_id'])) {
