@@ -291,7 +291,7 @@ include '../user/core/sessiontimeout.php';
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     console.log(xhr.responseText);
-                    window.location.href = "<?php echo ;?>"; 
+                    window.location.href = "<?php echo $indexPath;?>"; 
                 }
             };
             xhr.send("action=logout");
