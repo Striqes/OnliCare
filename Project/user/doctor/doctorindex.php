@@ -4,7 +4,6 @@
 
     // Check if the user is logged in
     if (!isset($_SESSION['user_id'])) {
-        exit('User is not logged in.');
         header("Location: $indexPath");
     }
 
