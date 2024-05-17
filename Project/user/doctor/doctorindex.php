@@ -5,6 +5,7 @@
     // Check if the user is logged in
     if (!isset($_SESSION['user_id'])) {
         exit('User is not logged in.');
+        header("Location: $indexPath");
     }
 
     // User Type verification
@@ -45,7 +46,7 @@
 
     $availability_stmt->close();
 
-    $sql = "SELECT a.AppointmentID, a.date, a.Patient_ID, u.First_Name, u.Last_Name, a.Status
+    $sql = "SELECT a.AppointmentID, a.date, a.Patient_ID, u.First_Name, u.Last_Name, a.Message
             FROM appointment a
             JOIN patient p ON a.Patient_ID = p.Patient_ID
             JOIN user u ON p.User_ID = u.UserID
@@ -70,7 +71,6 @@
     <script src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="output.css">
 </head>
 <body class="bg-white">
     <!-- NAV BAR -->
@@ -78,7 +78,7 @@
         <nav class="bg-white border-b border-gray-200 dark:bg-green-900">
             <div class="max-w-screen-xl mx-auto px-4 py-6 flex items-center justify-between">
                 <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
-                    <img src="../onlicarelogo.svg" class="h-10" alt="Logo" />
+                    <img src="<?php echo "$url_root" . "assets/onlicarelogo.svg";?>" class="h-10" alt="Logo" />
                     <span class="text-2xl font-semibold whitespace-nowrap dark:text-yellow-400">OnliCare</span>
                 </a>
 
@@ -183,7 +183,7 @@
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Appointment Date</th>
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Patient ID</th>
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Patient Name</th>
-                <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Message</th>
                 <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Action</th>
                 </tr>
             </thead>
@@ -195,7 +195,7 @@
                     echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['date']}</td>";
                     echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['Patient_ID']}</td>";
                     echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['First_Name']} {$row['Last_Name']}</td>";
-                    echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm text-gray-800'>{$row['Status']}</td>";
+                    echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm text-gray-800'>{$row['Message']}</td>";
                     echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm font-medium'>";
                     echo "<a href='#' class='text-green-500 hover:text-green-700'>Approve</a> | <a href='#' class='text-red-500 hover:text-red-700'>Decline</a>";
                     echo "</td>";

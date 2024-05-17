@@ -4,6 +4,7 @@ include '../user/core/sessiontimeout.php';
 
  if (!isset($_SESSION['user_id'])) {
     exit('User is not logged in.');
+    header("Location: $indexPath");
 } 
 
 ?>
@@ -285,11 +286,12 @@ include '../user/core/sessiontimeout.php';
 
         function logout() {
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "../user/core/logout.php", true);
+            xhr.open("POST", "../core/logout.php", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     console.log(xhr.responseText);
+                    window.location.href = "<?php echo ;?>"; 
                 }
             };
             xhr.send("action=logout");

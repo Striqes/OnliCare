@@ -4,6 +4,7 @@ include '../core/connection.php';
 
 if (!isset($_SESSION['user_id'])) {
     exit('User is not logged in.');
+    header("Location: $indexPath");
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
