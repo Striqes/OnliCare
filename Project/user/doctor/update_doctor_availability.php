@@ -3,7 +3,6 @@ include '../core/sessiontimeout.php';
 include '../core/connection.php';
 
 if (!isset($_SESSION['user_id'])) {
-    exit('User is not logged in.');
     header("Location: $indexPath");
 }
 
