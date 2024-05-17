@@ -44,12 +44,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($stmt->affected_rows === 0) {
             exit('Failed to make an appointment.');
         } else {
-            echo 'Appointment successfully made.';
+            $_SESSION['message'] = "Appointment successfully made. Please Wait for approval of Doctor.";
+            header("Location: appointment.php"); 
+            exit();
         }
     } else {
         echo 'All form fields are required.';
     }
 }
+
+    if (isset($_SESSION['message'])) {
+        echo '<script type="text/javascript">alert("' . $_SESSION['message'] . '");</script>';
+        unset($_SESSION['message']);
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
