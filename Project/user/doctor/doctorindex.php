@@ -22,7 +22,14 @@
     $availability_stmt->execute();
     $availability_result = $availability_stmt->get_result();
     $availability_row = $availability_result->fetch_assoc();
-    $is_available = $availability_row['is_available'];
+
+    // Check if a row was returned before accessing the array offset
+    if ($availability_row !== null && isset($availability_row['is_available'])) {
+        $is_available = $availability_row['is_available'];
+    } else {
+        // Handle the case where no row was returned or 'is_available' key doesn't exist
+        $is_available = 'default_value'; // or any default value you want to set
+    }
 
     $availability_stmt->close();
 
@@ -277,6 +284,7 @@
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     console.log(xhr.responseText);
+                    window.location.href = "<?php echo $indexPath;?>"; 
                 }
             };
             xhr.send("action=logout");
