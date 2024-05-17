@@ -26,12 +26,13 @@
 
     $availability_stmt->close();
 
-    $sql = "SELECT a.AppointmentID, a.date, u.First_Name, u.Last_Name, a.Status
-            FROM appointment a
-            JOIN patient p ON a.Patient_ID = p.Patient_ID
-            JOIN user u ON p.User_ID = u.UserID
-            JOIN doctor d ON a.Doctor_ID = d.Doctor_ID
-            WHERE a.Doctor_ID = ? AND d.is_available = 1";
+    $sql = "SELECT a.AppointmentID, a.date, a.Patient_ID, u.First_Name, u.Last_Name, a.Status
+        FROM appointment a
+        JOIN patient p ON a.Patient_ID = p.Patient_ID
+        JOIN user u ON p.User_ID = u.UserID
+        JOIN doctor d ON a.Doctor_ID = d.Doctor_ID
+        WHERE a.Doctor_ID = ? AND d.is_available = 1";
+  
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $doctor_id);
     $stmt->execute();
@@ -68,9 +69,6 @@
                         <li>
                             <a href="#" onclick="onToggleMenu(this); scrollToContent('about-us')" class="block py-2 px-3 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">ana pay maikabi?</a>
                         </li>
-                        <li>
-                            <a href="#" onclick="onToggleMenu(this); scrollToContent('services')" class="block py-2 px-3 text-yellow-900 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">Search</a>
-                        </li>
                     </ul>
                     <ul id="loginButtons" class="mx-auto md:ml-0 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-[2vw]">
                         <li>
@@ -80,6 +78,7 @@
                             <a href="user/signup.php" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Sign up</a>
                         </li>
                     </ul>
+        
                 </div>
                 
                 <label class="flex items-center relative w-max cursor-pointer select-none">
@@ -90,37 +89,67 @@
                     <span id="circle" class="w-7 h-7 right-7 absolute rounded-full transform transition-transform bg-gray-200" style="transform: <?php echo $is_available ? 'translateX(1.75rem)' : 'translateX(0)'; ?>;"></span>
                 </label>
                 <script>
-document.getElementById('toggle').addEventListener('change', function() {
-    var toggle = document.getElementById('toggle');
-    var circle = document.getElementById('circle');
-    var onText = document.getElementById('on');
-    var offText = document.getElementById('off');
-    var doctorId = <?php echo $_SESSION['user_id']; ?>; // Get the doctor ID from PHP session
+                    document.getElementById('toggle').addEventListener('change', function() {
+                        var toggle = document.getElementById('toggle');
+                        var circle = document.getElementById('circle');
+                        var onText = document.getElementById('on');
+                        var offText = document.getElementById('off');
+                        var doctorId = <?php echo $_SESSION['user_id']; ?>; // Get the doctor ID from PHP session
 
-    if (toggle.checked) {
-        circle.style.transform = 'translateX(1.75rem)';
-        toggle.classList.replace('bg-yellow-500', 'bg-green-500');
-        onText.style.display = 'block';
-        offText.style.display = 'none';
-    } else {
-        circle.style.transform = 'translateX(0)';
-        toggle.classList.replace('bg-green-500', 'bg-yellow-500');
-        onText.style.display = 'none';
-        offText.style.display = 'block';
-    }
+                        if (toggle.checked) {
+                            circle.style.transform = 'translateX(1.75rem)';
+                            toggle.classList.replace('bg-yellow-500', 'bg-green-500');
+                            onText.style.display = 'block';
+                            offText.style.display = 'none';
+                        } else {
+                            circle.style.transform = 'translateX(0)';
+                            toggle.classList.replace('bg-green-500', 'bg-yellow-500');
+                            onText.style.display = 'none';
+                            offText.style.display = 'block';
+                        }
 
-    // Send AJAX request to update_doctor_availability.php
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'update_doctor_availability.php', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.send('doctor_id=' + encodeURIComponent(doctorId) + '&isAvailable=' + encodeURIComponent(toggle.checked ? 1 : 0));
-});
-</script>
+                        // Send AJAX request to update_doctor_availability.php
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', 'update_doctor_availability.php', true);
+                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                        xhr.send('doctor_id=' + encodeURIComponent(doctorId) + '&isAvailable=' + encodeURIComponent(toggle.checked ? 1 : 0));
+                    });
+                </script>
+                       
+        <div class="relative">
+            <input type="text" id="search" class="block w-full py-2 px-3 rounded" placeholder="Search..." onkeyup="onSearch(this.value)">
+            <div id="searchResults" class="absolute left-0 mt-1 w-full z-10 bg-white border border-gray-300 rounded shadow-lg overflow-auto max-h-60" style="display: none;"></div>
+        </div>
+        <script>
+            function onSearch(searchTerm) {
+                if(searchTerm.length > 0) {
+                    $.ajax({
+                        url: '../core/search_patients.php',
+                        type: 'get',
+                        data: { searchTerm: searchTerm },
+                        success: function(response) {
+                            $('#searchResults').html(response);
+                            $('#searchResults').show();
+                        }
+                    });
+                } else {
+                    $('#searchResults').hide();
+                }
+            }
+
+            // Hide the dropdown when clicked outside
+            $(document).on('click', function (e) {
+                if ($(e.target).closest("#search").length === 0) {
+                    $('#searchResults').hide();
+                }
+            });
+        </script>     
             </div>
         </nav>
     </header>
 
 <main class="bg-gray-100 p-20 pl-24 min-h-screen">
+
 <div class="flex flex-col">
     <div class="-m-1.5 overflow-x-auto">
         <div class="p-1.5 min-w-full inline-block align-middle">
@@ -130,6 +159,7 @@ document.getElementById('toggle').addEventListener('change', function() {
                 <tr>
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Appointment ID</th>
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Appointment Date</th>
+                <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Patient ID</th>
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Patient Name</th>
                 <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Status</th>
                 <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Action</th>
@@ -141,6 +171,7 @@ document.getElementById('toggle').addEventListener('change', function() {
                     echo "<tr>";
                     echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['AppointmentID']}</td>";
                     echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['date']}</td>";
+                    echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['Patient_ID']}</td>";
                     echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['First_Name']} {$row['Last_Name']}</td>";
                     echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm text-gray-800'>{$row['Status']}</td>";
                     echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm font-medium'>";
