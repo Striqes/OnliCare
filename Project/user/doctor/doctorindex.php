@@ -13,7 +13,19 @@
         exit();
     }
 
-    $doctor_id = $_SESSION['user_id']; // Get the doctor's ID from the session
+    $getDoctorsql = "SELECT Doctor_ID FROM doctor WHERE User_ID = ?";
+    $getDoctorsql_stmt = $conn->prepare($getDoctorsql);
+    $getDoctorsql_stmt->bind_param("i", $_SESSION['user_id']);
+    $getDoctorsql_stmt->execute();
+
+    $getDoctor_result = $getDoctorsql_stmt->get_result();
+    $doctorRow = $getDoctor_result->fetch_assoc();
+
+    if(!isset($doctorRow['Doctor_ID'])){
+        exit('Doctor ID not Found error. Contact Administrator!');
+    } else {
+        $doctor_id = $doctorRow['Doctor_ID'];
+    }
 
     // Retrieve the doctor's availability status
     $availability_sql = "SELECT is_available FROM doctor WHERE Doctor_ID = ?";
@@ -28,23 +40,26 @@
         $is_available = $availability_row['is_available'];
     } else {
         // Handle the case where no row was returned or 'is_available' key doesn't exist
-        $is_available = 'default_value'; // or any default value you want to set
+        $is_available = '0'; // or any default value you want to set
     }
 
     $availability_stmt->close();
 
     $sql = "SELECT a.AppointmentID, a.date, a.Patient_ID, u.First_Name, u.Last_Name, a.Status
-        FROM appointment a
-        JOIN patient p ON a.Patient_ID = p.Patient_ID
-        JOIN user u ON p.User_ID = u.UserID
-        JOIN doctor d ON a.Doctor_ID = d.Doctor_ID
-        WHERE a.Doctor_ID = ? AND d.is_available = 1";
-  
+            FROM appointment a
+            JOIN patient p ON a.Patient_ID = p.Patient_ID
+            JOIN user u ON p.User_ID = u.UserID
+            JOIN doctor d ON a.Doctor_ID = d.Doctor_ID
+            WHERE a.Doctor_ID = ?";
+
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $doctor_id);
     $stmt->execute();
+
     $result = $stmt->get_result();
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
