@@ -4,7 +4,7 @@ include '../core/connection.php';
 
 // Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
-    exit('User is not logged in.');
+    header("Location: $indexPath");
 }
 
 if($_SESSION['UserType'] == 'Doctor'){
@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $patient_id = $row['Patient_ID'];
         $stmt_get_patient_id->close();
     
-        $sql = "INSERT INTO appointment (Doctor_ID, Patient_ID, date, Status) VALUES (?, ?, ?,? )";
+        $sql = "INSERT INTO appointment (Doctor_ID, Patient_ID, date, Message) VALUES (?, ?, ?,? )";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("iiss", $doctor_id, $patient_id, $date, $message);
         $stmt->execute();

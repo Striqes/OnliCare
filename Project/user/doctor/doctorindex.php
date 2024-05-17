@@ -4,7 +4,7 @@
 
     // Check if the user is logged in
     if (!isset($_SESSION['user_id'])) {
-        exit('User is not logged in.');
+        header("Location: $indexPath");
     }
 
     // User Type verification
@@ -13,7 +13,19 @@
         exit();
     }
 
-    $doctor_id = $_SESSION['user_id']; // Get the doctor's ID from the session
+    $getDoctorsql = "SELECT Doctor_ID FROM doctor WHERE User_ID = ?";
+    $getDoctorsql_stmt = $conn->prepare($getDoctorsql);
+    $getDoctorsql_stmt->bind_param("i", $_SESSION['user_id']);
+    $getDoctorsql_stmt->execute();
+
+    $getDoctor_result = $getDoctorsql_stmt->get_result();
+    $doctorRow = $getDoctor_result->fetch_assoc();
+
+    if(!isset($doctorRow['Doctor_ID'])){
+        exit('Doctor ID not Found error. Contact Administrator!');
+    } else {
+        $doctor_id = $doctorRow['Doctor_ID'];
+    }
 
     // Retrieve the doctor's availability status
     $availability_sql = "SELECT is_available FROM doctor WHERE Doctor_ID = ?";
@@ -22,22 +34,32 @@
     $availability_stmt->execute();
     $availability_result = $availability_stmt->get_result();
     $availability_row = $availability_result->fetch_assoc();
-    $is_available = $availability_row['is_available'];
+
+    // Check if a row was returned before accessing the array offset
+    if ($availability_row !== null && isset($availability_row['is_available'])) {
+        $is_available = $availability_row['is_available'];
+    } else {
+        // Handle the case where no row was returned or 'is_available' key doesn't exist
+        $is_available = '0'; // or any default value you want to set
+    }
 
     $availability_stmt->close();
 
-    $sql = "SELECT a.AppointmentID, a.date, a.Patient_ID, u.First_Name, u.Last_Name, a.Status
-        FROM appointment a
-        JOIN patient p ON a.Patient_ID = p.Patient_ID
-        JOIN user u ON p.User_ID = u.UserID
-        JOIN doctor d ON a.Doctor_ID = d.Doctor_ID
-        WHERE a.Doctor_ID = ? AND d.is_available = 1";
-  
+    $sql = "SELECT a.AppointmentID, a.date, a.Patient_ID, u.First_Name, u.Last_Name, a.Message
+            FROM appointment a
+            JOIN patient p ON a.Patient_ID = p.Patient_ID
+            JOIN user u ON p.User_ID = u.UserID
+            JOIN doctor d ON a.Doctor_ID = d.Doctor_ID
+            WHERE a.Doctor_ID = ?";
+
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $doctor_id);
     $stmt->execute();
+
     $result = $stmt->get_result();
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,7 +70,6 @@
     <script src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="output.css">
 </head>
 <body class="bg-white">
     <!-- NAV BAR -->
@@ -56,7 +77,7 @@
         <nav class="bg-white border-b border-gray-200 dark:bg-green-900">
             <div class="max-w-screen-xl mx-auto px-4 py-6 flex items-center justify-between">
                 <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
-                    <img src="../onlicarelogo.svg" class="h-10" alt="Logo" />
+                    <img src="<?php echo "$url_root" . "assets/onlicarelogo.svg";?>" class="h-10" alt="Logo" />
                     <span class="text-2xl font-semibold whitespace-nowrap dark:text-yellow-400">OnliCare</span>
                 </a>
 
@@ -161,7 +182,7 @@
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Appointment Date</th>
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Patient ID</th>
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Patient Name</th>
-                <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Message</th>
                 <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Action</th>
                 </tr>
             </thead>
@@ -173,7 +194,7 @@
                     echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['date']}</td>";
                     echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['Patient_ID']}</td>";
                     echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['First_Name']} {$row['Last_Name']}</td>";
-                    echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm text-gray-800'>{$row['Status']}</td>";
+                    echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm text-gray-800'>{$row['Message']}</td>";
                     echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm font-medium'>";
                     echo "<a href='#' class='text-green-500 hover:text-green-700'>Approve</a> | <a href='#' class='text-red-500 hover:text-red-700'>Decline</a>";
                     echo "</td>";
@@ -277,6 +298,7 @@
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     console.log(xhr.responseText);
+                    window.location.href = "<?php echo $indexPath;?>"; 
                 }
             };
             xhr.send("action=logout");

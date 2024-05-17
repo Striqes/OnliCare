@@ -3,7 +3,7 @@ include '../core/sessiontimeout.php';
 include '../core/connection.php';
 
 if (!isset($_SESSION['user_id'])) {
-    exit('User is not logged in.');
+    header("Location: $indexPath");
 }
 
 ?>
@@ -285,6 +285,7 @@ if (!isset($_SESSION['user_id'])) {
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     console.log(xhr.responseText);
+                    window.location.href = "<?php echo $indexPath;?>"; 
                 }
             };
             xhr.send("action=logout");
