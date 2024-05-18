@@ -6,6 +6,7 @@ $url_root = 'http://' . $_SERVER['HTTP_HOST'] . '/onlicare/';
 
 $indexPath = $url_root . "Project/index.php";
 $login = $url_root . "Project/user/login.php";
+$logout = $url_root . "Project/user/core/logout.php";
 $doctorIndex =  $url_root . "Project/user/doctor/doctorindex.php";
 $patientIndex =  $url_root . "Project/user/patient/patientindex.php";
 $adminIndex =  $url_root . "Project/user/admin/admin.php";

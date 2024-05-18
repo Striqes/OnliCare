@@ -4,7 +4,9 @@ include '../user/core/sessiontimeout.php';
 
  if (!isset($_SESSION['user_id'])) {
     header("Location: $indexPath");
-} 
+}
+
+
 
 ?>
 
@@ -274,7 +276,7 @@ include '../user/core/sessiontimeout.php';
             if (loginButtons) {
                 loginButtons.innerHTML = `
                     <li>
-                        <a href="user/profile.php" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Profile</a>
+                        <a href="" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Profile</a>
                     </li>
                     <li>
                         <button type="submit" onclick="logout()" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Log out</button>
@@ -285,7 +287,7 @@ include '../user/core/sessiontimeout.php';
 
         function logout() {
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "../core/logout.php", true);
+            xhr.open("POST", "<?php echo $logout ?>", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4 && xhr.status === 200) {
