@@ -110,27 +110,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <option class="font-semibold text-slate-300">Please Select doctor</option>
         </select>
     </div>
-
     <script>
-    function updateDoctors() {
-        var deptName = $("#department").val();
-        $.ajax({
-            url: '../core/get_doctors.php',
-            type: 'post',
-            data: {department:deptName},
-            dataType: 'json',
-            success:function(response){
-                var len = response.length;
-                $("#doctor").empty();
-                for( var i = 0; i<len; i++){
+function updateDoctors() {
+    var deptName = $("#department").val().trim();  // Ensure no trailing spaces or newlines
+
+    $.ajax({
+        url: '../core/get_doctors.php',
+        type: 'POST',
+        data: { department: deptName },
+        dataType: 'json',
+        success: function(response) {
+            console.log(response);  // Log the response for debugging
+            var len = response.length;
+            $("#doctor").empty(); // Clear the existing options
+
+            if (len > 0) {
+                for (var i = 0; i < len; i++) {
                     var name = "Dr. " + response[i]['First_Name'] + " " + response[i]['Last_Name'];
                     var id = response[i]['Doctor_ID'];
-                    $("#doctor").append("<option value='"+id+"'>"+name+"</option>");
+                    $("#doctor").append("<option value='" + id + "'>" + name + "</option>");
                 }
+            } else {
+                // Add a default option if no doctors are found
+                $("#doctor").append("<option value=''>No available doctors</option>");
             }
-        });
-    }
-  </script>
+        },
+        error: function(xhr, status, error) {
+            console.error("An error occurred while fetching doctors: ", status, error);
+            alert("An error occurred while fetching doctors. Please try again later.");
+        }
+    });
+}
+</script>
+
+
+
+
 
     <div class="my-6 flex gap-4">     
     <input type="date" name="date" class="block w-full rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm" required>
