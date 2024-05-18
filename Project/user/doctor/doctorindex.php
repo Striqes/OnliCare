@@ -1,65 +1,56 @@
 <?php
-    include '../core/sessiontimeout.php';
-    include '../core/connection.php';
+include '../core/sessiontimeout.php';
+include '../core/connection.php';
 
-    // Check if the user is logged in
-    if (!isset($_SESSION['user_id'])) {
-        header("Location: $indexPath");
-    }
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: $indexPath");
+    exit();
+}
 
-    // User Type verification
-    if ($_SESSION['UserType'] == 'Patient') {
-        header("Location: $indexPath");
-        exit();
-    }
+// User Type verification
+if ($_SESSION['UserType'] !== 'Doctor') {
+    header("Location: $indexPath");
+    exit();
+}
 
-    $getDoctorsql = "SELECT Doctor_ID FROM doctor WHERE User_ID = ?";
-    $getDoctorsql_stmt = $conn->prepare($getDoctorsql);
-    $getDoctorsql_stmt->bind_param("i", $_SESSION['user_id']);
-    $getDoctorsql_stmt->execute();
+// Get the doctor's ID based on the logged-in user ID
+$getDoctorsql = "SELECT Doctor_ID FROM doctor WHERE User_ID = ?";
+$getDoctorsql_stmt = $conn->prepare($getDoctorsql);
+$getDoctorsql_stmt->bind_param("i", $_SESSION['user_id']);
+$getDoctorsql_stmt->execute();
+$getDoctor_result = $getDoctorsql_stmt->get_result();
+$doctorRow = $getDoctor_result->fetch_assoc();
 
-    $getDoctor_result = $getDoctorsql_stmt->get_result();
-    $doctorRow = $getDoctor_result->fetch_assoc();
+if (!$doctorRow) {
+    exit('Doctor ID not found. Contact Administrator!');
+} else {
+    $doctor_id = $doctorRow['Doctor_ID'];
+}
 
-    if(!isset($doctorRow['Doctor_ID'])){
-        exit('Doctor ID not Found error. Contact Administrator!');
-    } else {
-        $doctor_id = $doctorRow['Doctor_ID'];
-    }
+// Retrieve the doctor's availability status
+$availability_sql = "SELECT is_available FROM doctor WHERE Doctor_ID = ?";
+$availability_stmt = $conn->prepare($availability_sql);
+$availability_stmt->bind_param("i", $doctor_id);
+$availability_stmt->execute();
+$availability_result = $availability_stmt->get_result();
+$availability_row = $availability_result->fetch_assoc();
 
-    // Retrieve the doctor's availability status
-    $availability_sql = "SELECT is_available FROM doctor WHERE Doctor_ID = ?";
-    $availability_stmt = $conn->prepare($availability_sql);
-    $availability_stmt->bind_param("i", $doctor_id);
-    $availability_stmt->execute();
-    $availability_result = $availability_stmt->get_result();
-    $availability_row = $availability_result->fetch_assoc();
+// Check if a row was returned before accessing the array offset
+$is_available = $availability_row ? $availability_row['is_available'] : 0;
+$availability_stmt->close();
 
-    // Check if a row was returned before accessing the array offset
-    if ($availability_row !== null && isset($availability_row['is_available'])) {
-        $is_available = $availability_row['is_available'];
-    } else {
-        // Handle the case where no row was returned or 'is_available' key doesn't exist
-        $is_available = '0'; // or any default value you want to set
-    }
-
-    $availability_stmt->close();
-
-    $sql = "SELECT a.AppointmentID, a.date, a.Patient_ID, u.First_Name, u.Last_Name, a.Message
-            FROM appointment a
-            JOIN patient p ON a.Patient_ID = p.Patient_ID
-            JOIN user u ON p.User_ID = u.UserID
-            JOIN doctor d ON a.Doctor_ID = d.Doctor_ID
-            WHERE a.Doctor_ID = ?";
-
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $doctor_id);
-    $stmt->execute();
-
-    $result = $stmt->get_result();
+// Retrieve appointments for the doctor
+$sql = "SELECT a.AppointmentID, a.date, a.Patient_ID, u.First_Name, u.Last_Name, a.Status, a.Message
+        FROM appointment a
+        JOIN patient p ON a.Patient_ID = p.Patient_ID
+        JOIN user u ON p.User_ID = u.UserID
+        WHERE a.Doctor_ID = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $doctor_id);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -183,18 +174,30 @@
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Patient ID</th>
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Patient Name</th>
                 <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Message</th>
+                <th scope="col" class="pl-10 px-20 py-3 text-end text-xs font-medium text-gray-500 uppercase">Status</th>
                 <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
                 <?php
                 while ($row = $result->fetch_assoc()) {
-                    echo "<tr>";
-                    echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['AppointmentID']}</td>";
+                    $statusClass = '';
+                    if ($row['Status'] === 'Success') {
+                        $statusClass = 'bg-green-100';
+                    } else if ($row['Status'] === 'Failed') {
+                        $statusClass = 'bg-red-100';
+                    }
+
+                    echo "<tr id='appointment-{$row['AppointmentID']}' class='{$statusClass}'>";
+                    echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800' >{$row['AppointmentID']}</td>";
                     echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['date']}</td>";
                     echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['Patient_ID']}</td>";
                     echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['First_Name']} {$row['Last_Name']}</td>";
                     echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm text-gray-800'>{$row['Message']}</td>";
+                    echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm font-medium'>";
+                    echo "<a href='#' class='status-link text-green-500 hover:text-green-700' data-id='{$row['AppointmentID']}' data-status='Success'>Success</a> | ";
+                    echo "<a href='#' class='status-link text-red-500 hover:text-red-700' data-id='{$row['AppointmentID']}' data-status='Pending'>Pending</a> | ";
+                    echo "<a href='#' class='status-link text-red-500 hover:text-red-700' data-id='{$row['AppointmentID']}' data-status='Failed'>Failed</a>";
                     echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm font-medium'>";
                     echo "<a href='#' class='text-green-500 hover:text-green-700'>Approve</a> | <a href='#' class='text-red-500 hover:text-red-700'>Decline</a>";
                     echo "</td>";
@@ -206,12 +209,50 @@
         </div>
         </div>
     </div>
-    </div>
+</div>
+<script>
+    // status
+    document.querySelectorAll('.status-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const appointmentID = this.dataset.id;
+            const status = this.dataset.status;
 
+            // Send AJAX request to update_appointment_status.php
+            $.ajax({
+                url: '../core/update_appointment_status.php',
+                type: 'POST',
+                data: { appointmentID: appointmentID, status: status },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        alert('Status updated successfully.');
 
+                        // Get the row element
+                        const row = document.getElementById('appointment-' + appointmentID);
 
+                        // Remove all status classes
+                        row.classList.remove('bg-green-100', 'bg-red-100');
 
-    
+                        // Add the appropriate status class
+                        if (status === 'Success') {
+                            row.classList.add('bg-green-100');
+                        } else if (status === 'Failed') {
+                            row.classList.add('bg-red-100');
+                        }
+
+                        // location.reload(); // Commented out
+                    } else {
+                        alert('Failed to update status: ' + response.message);
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    alert('An error occurred: ' + textStatus);
+                }
+            });
+        });
+    });
+</script>
 
     <?php 
         if(!isset($_SESSION["user_id"])){
@@ -225,8 +266,6 @@
             $stmt->execute();
             $result = $stmt->get_result();
             $user = $result->fetch_assoc();
-
-            echo '<script>changeLoginButtonsContent();</script>';
         }
 
     ?>
