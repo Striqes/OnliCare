@@ -13,6 +13,8 @@ $adminIndex =  $url_root . "Project/user/admin/admin.php";
 
 $appointment = $url_root. "Project/user/patient/appointment.php";
 $updateProfile = $url_root. "Project/user/profileBackend/updateProfile.php";
+$defProfile = $url_root. "Project/user/profile.php";
+$doctorProfile = $url_root. "Project/user/doctor/doctorprofile.php";
 
 if ($conn -> connect_errno) {
   echo "Failed to connect to MySQL: " . $conn -> connect_error;
