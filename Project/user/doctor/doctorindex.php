@@ -74,14 +74,6 @@ $result = $stmt->get_result();
 
                 <!-- MENU BAR -->
                 <div class="gap-8 nav-links duration-500 md:static absolute md:min-h-fit bg-green-900 max-h-[15vh] left-0 top-[-100%] md:w-auto w-full flex items-center p-5">
-                    <ul class="mx-auto md:ml-0 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-[2vw]">
-                        <li>
-                            <a href="#" onclick="onToggleMenu(this); scrollToContent('home')" class="block py-2 px-3 text-white rounded hover:bg-transparent hover:text-green-700 dark:text-white dark:hover:text-yellow-300">Appointment List</a>
-                        </li>
-                        <li>
-                            <a href="#" onclick="onToggleMenu(this); scrollToContent('about-us')" class="block py-2 px-3 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">ana pay maikabi?</a>
-                        </li>
-                    </ul>
                     <ul id="loginButtons" class="mx-auto md:ml-0 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-[2vw]">
                         <li>
                             <a href="user/login.php" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Log in</a>
@@ -159,6 +151,7 @@ $result = $stmt->get_result();
             </div>
         </nav>
     </header>
+
 
 <main class="bg-gray-100 p-20 pl-24 min-h-screen">
 
@@ -338,6 +331,10 @@ $result = $stmt->get_result();
                                     <a href="#" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Dashboard</a>
                                 </li>
                                 
+                                <li>
+                                    <a href="'. $medRecords .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Medical Records</a>
+                                </li>
+
                                 <li>
                                     <a href="'. $doctorProfile .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Profile</a>
                                 </li>
