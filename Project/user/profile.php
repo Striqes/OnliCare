@@ -4,7 +4,9 @@ include '../user/core/sessiontimeout.php';
 
  if (!isset($_SESSION['user_id'])) {
     header("Location: $indexPath");
-} 
+}
+
+
 
 ?>
 
@@ -276,9 +278,49 @@ include '../user/core/sessiontimeout.php';
             var loginButtons = document.getElementById("loginButtons");
             if (loginButtons) {
                 loginButtons.innerHTML = `
-                    <li>
-                        <a href="user/profile.php" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Profile</a>
-                    </li>
+
+
+                    <?php 
+                    
+                        if(!isset($_SESSION['user_id'])){
+                            exit();
+                        } else {
+                            if($_SESSION['UserType'] == 'Patient'){
+                                echo
+                                '<li>
+                                    <a href="'. $appointment .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Make an Appointment</a>
+                                </li>';
+                            }else if($_SESSION['UserType'] == 'Doctor'){
+                                echo
+                                '<li>
+                                    <a href="'. $doctorIndex .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Dashboard</a>
+                                </li>
+                                
+                                <li>
+                                    <a href="'. $doctorProfile .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Profile</a>
+                                </li>
+                                ';
+                            }else if($_SESSION['UserType'] == 'Admin'){
+                                echo
+                                '<li>
+                                    <a href="'. $adminIndex .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Admin Panel</a>
+                                </li>';
+                            } else {
+                                exit('Unknown User Type');
+                            }
+
+                            if($_SESSION['UserType'] == 'Doctor'){
+
+                            } else {
+                                echo
+                                '<li>
+                                    <a href="'. $defProfile .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Profile</a>
+                                </li>';
+                            }
+                        }
+
+                    ?>
+
                     <li>
                         <button type="submit" onclick="logout()" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Log out</button>
                     </li>
@@ -288,7 +330,7 @@ include '../user/core/sessiontimeout.php';
 
         function logout() {
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "../core/logout.php", true);
+            xhr.open("POST", "<?php echo $logout ?>", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4 && xhr.status === 200) {

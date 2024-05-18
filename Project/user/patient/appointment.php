@@ -22,7 +22,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $currentDate = date('Y-m-d');
         if ($date < $currentDate) {
             echo '<script>alert("Cannot book an appointment in the past.");</script>';
-        
         }
         if (empty($doctor_id) || empty($date) || empty($message)) {
             exit('All form fields are required.');

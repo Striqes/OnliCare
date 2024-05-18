@@ -27,13 +27,13 @@ if (!isset($_SESSION['user_id']) && !endsWith($_SERVER['REQUEST_URI'], 'index.ph
 } */
 
 // Check if user is logged in
-if (isset($_SESSION['user_id'])) {
-  // Display the button only if user is logged in
-  echo "User ID: " . $_SESSION['user_id'];
-  echo '<form method="post">';
-  echo '<button type="submit" name="logout">Destroy Session</button>';
-  echo '</form>';
-}
+// if (isset($_SESSION['user_id'])) {
+//   // Display the button only if user is logged in
+//   echo "User ID: " . $_SESSION['user_id'];
+//   echo '<form method="post">';
+//   echo '<button type="submit" name="logout">Destroy Session</button>';
+//   echo '</form>';
+// }
 
 function endsWith($haystack, $needle) {
   $length = strlen($needle);
