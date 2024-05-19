@@ -20,9 +20,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message = $_POST['textarea'];
 
         $currentDate = date('Y-m-d');
+        $currentTime = date('H:i:s');
+        $noonTime = "12:00:00";
+
         if ($date < $currentDate) {
             echo '<script>alert("Cannot book an appointment in the past.");</script>';
+            exit();
         }
+
+        // Check if the date is today and the current time is past 12 PM
+        if ($date == $currentDate && $currentTime > $noonTime) {
+            echo '<script>alert("Cannot book an appointment for today please select another day.");</script>';
+            exit();
+        }
+
+        // Check if the date is more than a month in the future
+        $oneMonthFromNow = date('Y-m-d', strtotime('+1 month'));
+        if ($date > $oneMonthFromNow) {
+            echo '<script>alert("Cannot book an appointment more than a month in advance.");</script>';
+            exit();
+        }
+
+
         if (empty($doctor_id) || empty($date) || empty($message)) {
             exit('All form fields are required.');
         }
