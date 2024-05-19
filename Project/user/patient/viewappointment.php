@@ -193,7 +193,7 @@ $result = $stmt->get_result();
             if (loginButtons) {
                 loginButtons.innerHTML = `
                     <li>
-                        <a href="doctorprofile.php" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Profile</a>
+                        <a href="<?php echo $defProfile?>" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Profile</a>
                     </li>
                     <li>
                         <button type="submit" onclick="logout()" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Log out</button>
