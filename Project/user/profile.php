@@ -46,12 +46,6 @@ include '../user/core/sessiontimeout.php';
                         <li>
                             <a href="../index.php#services" class="block py-2 px-3 text-yellow-900 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">Services</a>
                         </li>
-                        <li>
-                            <a href="patient/appointment.php" class="block py-2 px-3 text-yellow-900 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">Make an Appointment</a>
-                        </li>
-                        <li>
-                            <a href="patient/viewappointment.php" class="block py-2 px-3 text-yellow-900 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">View Appointment</a>
-                        </li>
                     </ul>
                     <ul id="loginButtons" class="mx-auto md:ml-0 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-[2vw]">
                         <li>
@@ -290,6 +284,12 @@ include '../user/core/sessiontimeout.php';
                                 '<li>
                                     <a href="'. $appointment .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Make an Appointment</a>
                                 </li>';
+                                if($_SESSION['UserType'] == 'Patient'){
+                                    echo
+                                    '<li>
+                                        <a href="'. $ViewAppointment .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">View Appointments</a>
+                                    </li>';
+                                }
                             }else if($_SESSION['UserType'] == 'Doctor'){
                                 echo
                                 '<li>
