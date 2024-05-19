@@ -40,12 +40,12 @@ $availability_row = $availability_result->fetch_assoc();
 $is_available = $availability_row ? $availability_row['is_available'] : 0;
 $availability_stmt->close();
 
-// Retrieve appointments for the doctor
-$sql = "SELECT a.AppointmentID, a.date, a.Patient_ID, u.First_Name, u.Last_Name, a.Status, a.Message
+// Retrieve appointments for the doctor excluding declined ones
+$sql = "SELECT a.AppointmentID, a.date, a.Patient_ID, u.First_Name, u.Last_Name, a.Status, a.Action
         FROM appointment a
         JOIN patient p ON a.Patient_ID = p.Patient_ID
         JOIN user u ON p.User_ID = u.UserID
-        WHERE a.Doctor_ID = ?";
+        WHERE a.Doctor_ID = ? AND a.is_visible = 1"; 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $doctor_id);
 $stmt->execute();
@@ -166,37 +166,38 @@ $result = $stmt->get_result();
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Appointment Date</th>
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Patient ID</th>
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Patient Name</th>
-                <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Message</th>
                 <th scope="col" class="pl-10 px-20 py-3 text-end text-xs font-medium text-gray-500 uppercase">Status</th>
                 <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-                <?php
-                while ($row = $result->fetch_assoc()) {
-                    $statusClass = '';
-                    if ($row['Status'] === 'Success') {
-                        $statusClass = 'bg-green-100';
-                    } else if ($row['Status'] === 'Failed') {
-                        $statusClass = 'bg-red-100';
-                    }
+            <?php
+                    while ($row = $result->fetch_assoc()) {
+                        $statusClass = '';
+                        if ($row['Status'] === 'Success') {
+                            $statusClass = 'bg-green-100';
+                        } else if ($row['Status'] === 'Failed') {
+                            $statusClass = 'bg-red-100';
+                        } else if ($row['Status'] === 'Approved') {
+                            $statusClass = 'bg-blue-200';
+                        }
 
-                    echo "<tr id='appointment-{$row['AppointmentID']}' class='{$statusClass}'>";
-                    echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800' >{$row['AppointmentID']}</td>";
-                    echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['date']}</td>";
-                    echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['Patient_ID']}</td>";
-                    echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['First_Name']} {$row['Last_Name']}</td>";
-                    echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm text-gray-800'>{$row['Message']}</td>";
-                    echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm font-medium'>";
-                    echo "<a href='#' class='status-link text-green-500 hover:text-green-700' data-id='{$row['AppointmentID']}' data-status='Success'>Success</a> | ";
-                    echo "<a href='#' class='status-link text-red-500 hover:text-red-700' data-id='{$row['AppointmentID']}' data-status='Pending'>Pending</a> | ";
-                    echo "<a href='#' class='status-link text-red-500 hover:text-red-700' data-id='{$row['AppointmentID']}' data-status='Failed'>Failed</a>";
-                    echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm font-medium'>";
-                    echo "<a href='#' class='text-green-500 hover:text-green-700'>Approve</a> | <a href='#' class='text-red-500 hover:text-red-700'>Decline</a>";
-                    echo "</td>";
-                    echo "</tr>";
-                }
-                ?>
+                        echo "<tr id='appointment-{$row['AppointmentID']}' class='{$statusClass}'>";
+                        echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800' >{$row['AppointmentID']}</td>";
+                        echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['date']}</td>";
+                        echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['Patient_ID']}</td>";
+                        echo "<td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['First_Name']} {$row['Last_Name']}</td>";
+                        echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm font-medium'>";
+                        echo "<a href='#' class='status-link text-green-500 hover:text-green-700' data-id='{$row['AppointmentID']}' data-status='Success'>Success</a> | ";
+                        echo "<a href='#' class='status-link text-black-500 hover:text-black-700' data-id='{$row['AppointmentID']}' data-status='Pending'>Pending</a> | ";
+                        echo "<a href='#' class='status-link text-red-500 hover:text-red-700' data-id='{$row['AppointmentID']}' data-status='Failed'>Failed</a>";
+                        echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm font-medium'>";
+                        echo "<a href='#' class='approve-link text-green-500 hover:text-green-700' data-id='{$row['AppointmentID']}' data-status='Approved'>Approved</a> | <a href='#' class='decline-link text-red-500 hover:text-red-700' data-id='{$row['AppointmentID']}'>Decline</a>";
+                        echo "</td>";
+                        echo "</tr>";
+                    }
+                    ?>
+
             </tbody>
             </table>
         </div>
@@ -204,7 +205,6 @@ $result = $stmt->get_result();
     </div>
 </div>
 <script>
-    // status
     document.querySelectorAll('.status-link').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
@@ -225,16 +225,16 @@ $result = $stmt->get_result();
                         const row = document.getElementById('appointment-' + appointmentID);
 
                         // Remove all status classes
-                        row.classList.remove('bg-green-100', 'bg-red-100');
+                        row.classList.remove('bg-green-100', 'bg-red-100', 'bg-blue-100');
 
                         // Add the appropriate status class
                         if (status === 'Success') {
                             row.classList.add('bg-green-100');
                         } else if (status === 'Failed') {
                             row.classList.add('bg-red-100');
+                        } else if (status === 'Approved') {
+                            row.classList.add('bg-blue-100');
                         }
-
-                        // location.reload(); // Commented out
                     } else {
                         alert('Failed to update status: ' + response.message);
                     }
@@ -245,8 +245,64 @@ $result = $stmt->get_result();
             });
         });
     });
-</script>
+document.querySelectorAll('.approve-link, .decline-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const appointmentID = this.dataset.id;
+        const action = this.classList.contains('approve-link') ? 'Approved' : 'Rejected';
 
+        if (action === 'Rejected') {
+            const reason = prompt("Please provide a reason for declining the appointment:");
+            if (!reason) return; // Cancelled
+
+            // Send AJAX request to update_appointment_action.php with the reason
+            $.ajax({
+                url: '../core/update_appointment_action.php',
+                type: 'POST',
+                data: { appointmentID: appointmentID, action: action, reason: reason },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        alert('Appointment ' + action.toLowerCase() + ' successfully. ' + response.message);
+                        // Remove the appointment row from the table
+                        document.getElementById('appointment-' + appointmentID).remove();
+                    } else {
+                        alert('Failed to ' + action.toLowerCase() + ' appointment: ' + response.message);
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    alert('An error occurred: ' + textStatus);
+                }
+            });
+        } else {
+            const message = prompt("Please provide a message for the patient:");
+            if (!message) return; // Cancelled
+
+            // Send AJAX request to update_appointment_action.php with the message
+            $.ajax({
+                url: '../core/update_appointment_action.php',
+                type: 'POST',
+                data: { appointmentID: appointmentID, action: action, message: message },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        alert('Appointment ' + action.toLowerCase() + ' successfully. ' + response.message);
+                        // Update row color
+                        const row = document.getElementById('appointment-' + appointmentID);
+                        row.classList.remove('bg-green-100', 'bg-red-100', 'bg-blue-100');
+                        row.classList.add('bg-blue-100');
+                    } else {
+                        alert('Failed to ' + action.toLowerCase() + ' appointment: ' + response.message);
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    alert('An error occurred: ' + textStatus);
+                }
+            });
+        }
+    });
+});
+</script>
     <?php 
         if(!isset($_SESSION["user_id"])){
             // nothing happens

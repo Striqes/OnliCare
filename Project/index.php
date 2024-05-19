@@ -269,6 +269,12 @@ include 'user/core/sessiontimeout.php';
                                 '<li>
                                     <a href="'. $appointment .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Make an Appointment</a>
                                 </li>';
+                                if($_SESSION['UserType'] == 'Patient'){
+                                    echo
+                                    '<li>
+                                        <a href="'. $ViewAppointment .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">View Appointments</a>
+                                    </li>';
+                                }
                             }else if($_SESSION['UserType'] == 'Doctor'){
                                 echo
                                 '<li>

@@ -24,6 +24,7 @@ $row = $result->fetch_assoc();
 $patientId = $row['Patient_ID'];
 
 // SQL query to fetch appointment details for the logged-in patient
+
 $sql = "SELECT 
             appointment.AppointmentID, 
             appointment.date AS AppointmentDate, 
@@ -31,7 +32,8 @@ $sql = "SELECT
             CONCAT(user.First_Name, ' ', user.Last_Name) AS PatientName, 
             appointment.date AS AppointmentDateTime, 
             CONCAT(doc_user.First_Name, ' ', doc_user.Last_Name) AS DoctorName, 
-            appointment.Status 
+            appointment.Status,
+            appointment.message AS Message
         FROM 
             appointment 
         JOIN 
@@ -110,6 +112,7 @@ $result = $stmt->get_result();
                                     <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Date and Time</th>
                                     <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Doctor</th>
                                     <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Message</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -125,6 +128,8 @@ $result = $stmt->get_result();
                                         echo "<td class='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>" . $row['AppointmentDateTime'] . "</td>";
                                         echo "<td class='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>" . $row['DoctorName'] . "</td>";
                                         echo "<td class='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>" . $row['Status'] . "</td>";
+                                        echo "<td class='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>" . $row['Message'] . "</td>";
+                                     
                                         echo "</tr>";
                                     }
                                 } else {
