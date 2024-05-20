@@ -152,14 +152,20 @@ $result = $stmt->get_result();
         </nav>
     </header>
 
-
-<main class="bg-gray-100 p-20 pl-24 min-h-screen">
-
+<main class="bg-gray-100 p-5 pl-24 min-h-screen">
+<div class="flex flex-col space-y-1 items-end ...">
+        <div class="text-green-500">Success = Green</div>
+        <div class="text-yellow-500">Pending = Yellow</div>
+        <div class="text-red-500">Failed = Red</div>
+        <div class="text-blue-500">Approved = Blue</div>
+        <div class="text-gray-500">Declined = Deleted</div>
+    </div>
 <div class="flex flex-col">
+    </div>
     <div class="-m-1.5 overflow-x-auto">
         <div class="p-1.5 min-w-full inline-block align-middle">
         <div class="border rounded-lg overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
+            <table class="min-w-full divide-y divide-gray-200">     
             <thead class="bg-gray-50">
                 <tr>
                 <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Appointment ID</th>
@@ -169,17 +175,45 @@ $result = $stmt->get_result();
                 <th scope="col" class="pl-10 px-20 py-3 text-end text-xs font-medium text-gray-500 uppercase">Status</th>
                 <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase">Action</th>
                 </tr>
+                
             </thead>
             <tbody class="divide-y divide-gray-200">
             <?php
-                    while ($row = $result->fetch_assoc()) {
+/*                     while ($row = $result->fetch_assoc()) {
+                        // nu nalpas jay appointmenten automatically mai remove jay doctor table       
+                        $appointmentDate = new DateTime($row['date']);
+                        $appointmentDate->setTimezone(new DateTimeZone('Asia/Manila'));
+                        
+                        $currentDate = new DateTime();
+                        $currentDate->setTimezone(new DateTimeZone('Asia/Manila'));
+                    
+                        // If the appointment date is in the past, skip rendering this row
+                        if ($appointmentDate < $currentDate) {
+                            continue;
+                        }  */
+                        while ($row = $result->fetch_assoc()) {
+                            $appointmentDate = new DateTime($row['date']);
+                            $appointmentDate->setTimezone(new DateTimeZone('Asia/Manila'));
+                            
+                            $currentDate = new DateTime();
+                            $currentDate->setTimezone(new DateTimeZone('Asia/Manila'));
+        
+                            // If the appointment date is in the past, update is_visible to 0 and skip rendering this row
+                            if ($appointmentDate < $currentDate) {
+                                $appointmentId = $row['AppointmentID'];
+                                $sql = "UPDATE appointment SET is_visible = 0 WHERE AppointmentID = $appointmentId";
+                                $conn->query($sql);
+                                continue;
+                            } 
                         $statusClass = '';
                         if ($row['Status'] === 'Success') {
-                            $statusClass = 'bg-green-100';
+                            $statusClass = 'bg-green-200';
                         } else if ($row['Status'] === 'Failed') {
-                            $statusClass = 'bg-red-100';
+                            $statusClass = 'bg-red-200';
                         } else if ($row['Status'] === 'Approved') {
                             $statusClass = 'bg-blue-200';
+                        } else if ($row['Status'] === 'Pending'){
+                            $statusClass = 'bg-yellow-200';
                         }
 
                         echo "<tr id='appointment-{$row['AppointmentID']}' class='{$statusClass}'>";
@@ -192,7 +226,7 @@ $result = $stmt->get_result();
                         echo "<a href='#' class='status-link text-black-500 hover:text-black-700' data-id='{$row['AppointmentID']}' data-status='Pending'>Pending</a> | ";
                         echo "<a href='#' class='status-link text-red-500 hover:text-red-700' data-id='{$row['AppointmentID']}' data-status='Failed'>Failed</a>";
                         echo "<td class='px-6 py-4 text-end whitespace-nowrap text-sm font-medium'>";
-                        echo "<a href='#' class='approve-link text-green-500 hover:text-green-700' data-id='{$row['AppointmentID']}' data-status='Approved'>Approved</a> | <a href='#' class='decline-link text-red-500 hover:text-red-700' data-id='{$row['AppointmentID']}'>Decline</a>";
+                        echo "<a href='#' class='approve-link text-green-500 hover:text-green-700' data-id='{$row['AppointmentID']}' data-status='Approved'>Approved</a> | <a href='#' class='decline-link text-red-500 hover:text-red-700' data-id='{$row['AppointmentID']}'>Declined</a>";
                         echo "</td>";
                         echo "</tr>";
                     }
