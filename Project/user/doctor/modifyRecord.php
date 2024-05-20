@@ -2,29 +2,46 @@
 
 include '../core/connection.php';
 
-// Get the doctor's ID based on the logged-in user ID
-$getDoctorsql = "SELECT Doctor_ID FROM doctor WHERE User_ID = ?";
-$getDoctorsql_stmt = $conn->prepare($getDoctorsql);
-$getDoctorsql_stmt->bind_param("i", $_SESSION['user_id']);
-$getDoctorsql_stmt->execute();
-$getDoctor_result = $getDoctorsql_stmt->get_result();
-$doctorRow = $getDoctor_result->fetch_assoc();
+$record_id = $_POST["record_id"];
 
-if (!$doctorRow) {
-    exit('Doctor ID not found. Contact Administrator!');
-} else {
-    $doctor_id = $doctorRow['Doctor_ID'];
+$getrecordsql = "SELECT RecordID FROM records WHERE RecordID = ?";
+$getrecordsql_stmt = $conn->prepare($getrecordsql);
+$getrecordsql_stmt->bind_param("i", $record_id);
+$getrecordsql_stmt->execute();
+$getrecord_result = $getrecordsql_stmt->get_result();
+$recordRow = $getrecord_result->fetch_assoc();
+
+if (!$recordRow) {
+    exit('Record ID not found. Contact Administrator!');
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($doctor_id)) {
-    $patient_id = $_POST['patient_id'];
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($record_id)) {
+
+    $patient_id = $_POST['patient_id'] ?? null;
     $diagnosis = $_POST['diagnosis'];
     $feedback = $_POST['feedback'];
+    $fname = $_POST["first_name"] ?? null;
+    $mi = $_POST["middle_initial"] ?? null;
+    $lname = $_POST["last_name"] ?? null;
+
+    if(!isset($_POST['nameToggle'])){
+        $patient_id = null;
+    }
 
     // If a record exists, update it
-    $update_sql = "UPDATE records SET Patient_ID = ?, Diagnosis = ?, Feedback = ? WHERE RecordID = ?";
-    $update_stmt = $conn->prepare($update_sql);
-    $update_stmt->bind_param("ssi", $diagnosis, $feedback, $existing_record['RecordID']);
+    if($patient_id){
+
+        $update_sql = "UPDATE records SET Patient_ID = ?, Diagnosis = ?, Feedback = ? WHERE RecordID = ?";
+        $update_stmt = $conn->prepare($update_sql);
+        $update_stmt->bind_param("issi", $patient_id, $diagnosis, $feedback, $record_id);
+
+    } elseif($fname && $lname) {
+        $update_sql = "UPDATE records SET Patient_ID = NULL, fname = ?, middle_initial = ?, lname = ?, Diagnosis = ?, Feedback = ? WHERE RecordID = ?";
+        $update_stmt = $conn->prepare($update_sql);
+        $update_stmt->bind_param("sssssi", $fname, $mi, $lname, $diagnosis, $feedback, $record_id);
+    }
+
+    
     if ($update_stmt->execute()) {
         echo "success";
     } else {
@@ -32,7 +49,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($doctor_id)) {
     }
     $update_stmt->close();
 
-    $check_stmt->close();
 }
 
 ?>

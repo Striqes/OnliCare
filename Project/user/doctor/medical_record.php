@@ -46,35 +46,51 @@ $patient_id = isset($_GET['patient_id']) ? intval($_GET['patient_id']) : 0;
 // Retrieve appointments for the doctor
     $sql = "
         SELECT 
-                r.RecordID, 
-                r.Patient_ID, 
-                r.Doctor_ID, 
-                r.Diagnosis, 
-                r.Feedback, 
-                pUser.First_Name AS Patient_First_Name, 
-                pUser.Middle_Initial AS Patient_Middle_Initial, 
-                pUser.Last_Name AS Patient_Last_Name, 
-                dUser.First_Name AS Doctor_First_Name, 
-                dUser.Last_Name AS Doctor_Last_Name
-                FROM 
-                records r
-            JOIN 
-                patient p ON r.Patient_ID = p.Patient_ID
-            JOIN 
-                user pUser ON p.User_ID = pUser.UserID
-            JOIN 
-                doctor d ON r.Doctor_ID = d.Doctor_ID
-            JOIN 
-                user dUser ON d.User_ID = dUser.UserID
+            r.RecordID, 
+            IFNULL(r.Patient_ID, NULL) AS Patient_ID, 
+            r.Doctor_ID, 
+            r.Diagnosis, 
+            r.Feedback, 
+            CASE 
+                WHEN r.Patient_ID IS NULL THEN SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(r.Patient_ID, CONCAT(r.fname, ' ', IFNULL(r.middle_initial, ''), ' ', r.lname)), ' ', 1), ' ', -1) 
+                ELSE pUser.First_Name 
+            END AS Patient_First_Name, 
+            CASE 
+                WHEN r.Patient_ID IS NULL THEN 
+                    CASE 
+                        WHEN LENGTH(IFNULL(r.Patient_ID, CONCAT(r.fname, ' ', IFNULL(r.middle_initial, ''), ' ', r.lname))) - LENGTH(REPLACE(IFNULL(r.Patient_ID, CONCAT(r.fname, ' ', IFNULL(r.middle_initial, ''), ' ', r.lname)), ' ', '')) > 1 THEN 
+                            SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(r.Patient_ID, CONCAT(r.fname, ' ', IFNULL(r.middle_initial, ''), ' ', r.lname)), ' ', 2), ' ', -1)
+                        ELSE 
+                            NULL
+                    END
+                ELSE pUser.Middle_Initial 
+            END AS Patient_Middle_Initial, 
+            CASE 
+                WHEN r.Patient_ID IS NULL THEN 
+                    SUBSTRING_INDEX(IFNULL(r.Patient_ID, CONCAT(r.fname, ' ', IFNULL(r.middle_initial, ''), ' ', r.lname)), ' ', -1) 
+                ELSE pUser.Last_Name 
+            END AS Patient_Last_Name, 
+            dUser.First_Name AS Doctor_First_Name, 
+            dUser.Last_Name AS Doctor_Last_Name
+        FROM 
+            records r
+        LEFT JOIN 
+            patient p ON r.Patient_ID = p.Patient_ID
+        LEFT JOIN 
+            user pUser ON p.User_ID = pUser.UserID
+        JOIN 
+            doctor d ON r.Doctor_ID = d.Doctor_ID
+        JOIN 
+            user dUser ON d.User_ID = dUser.UserID
     ";
 
     // Append WHERE clause if patient_id is specified
     if ($patient_id > 0) {
-        $sql .= " WHERE r.Patient_ID = ?";
+        $sql .= " WHERE r.Patient_ID = ? AND r.visible = 1";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $patient_id);
     } else {
-        $sql .= " WHERE r.Doctor_ID = ?";
+        $sql .= " WHERE r.Doctor_ID = ? AND r.visible = 1";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $doctor_id);
     }
@@ -205,23 +221,32 @@ $patient_id = isset($_GET['patient_id']) ? intval($_GET['patient_id']) : 0;
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-                <?php
+            <?php
                 while ($row = $result->fetch_assoc()) {
                     echo "
                     <tr>
                         <td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['RecordID']}</td>
                         <td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['Diagnosis']}</td>
                         <td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['Feedback']}</td>
-                        <td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['Patient_ID']}</td>
+                        <td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>";
+
+                    if(isset($row['Patient_ID'])){ 
+                        echo $row['Patient_ID']; 
+                    } else {
+                        echo "Not Registered"; 
+                    }
+
+                    echo "</td>
                         <td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['Patient_First_Name']} {$row['Patient_Middle_Initial']}. {$row['Patient_Last_Name']}</td>
                         <td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['Doctor_ID']}</td>
                         <td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>Dr. {$row['Doctor_First_Name']} {$row['Doctor_Last_Name']}</td>
                         <td class='px-6 py-4 text-end whitespace-nowrap text-sm font-medium'>
-                            <a href='edit_record.php?record_id={$row['RecordID']}' class='text-green-500 hover:text-green-700'>Modify</a> | <a href='#' class='text-red-500 hover:text-red-700'>Delete</a>
+                            <a href='edit_record.php?record_id={$row['RecordID']}' class='text-green-500 hover:text-green-700'>Modify</a> | <a href='#' id='delete' class='text-red-500 hover:text-red-700' onclick='deleteRecord({$row['RecordID']})'>Delete</a>
                         </td>
                     </tr>";
                 }
-                ?>
+            ?>
+
             </tbody>
         </table>
 
@@ -269,6 +294,29 @@ $patient_id = isset($_GET['patient_id']) ? intval($_GET['patient_id']) : 0;
             e.name = e.name === 'menu' ? 'close' : 'menu'
             navLinks.classList.toggle('top-[9%]')
             // navLinks.classList.toggle('hidden');
+        }
+
+        function deleteRecord(recordID) {
+            if (confirm("Are you sure you want to delete this record?")) {
+                // Perform AJAX request to delete the record
+                // Example using jQuery AJAX
+                $.ajax({
+                    url: 'deleteRecord.php',
+                    type: 'POST',
+                    data: { record_id: recordID },
+                    success: function(response) {
+                        // Handle success response
+                        // For example, you can redirect to a different page
+                        alert(response);
+                        console.error(response);
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error
+                        console.error(error);
+                    }
+                });
+            }
         }
 
         function changeLoginButtonsContent() {

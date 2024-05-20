@@ -17,14 +17,29 @@ if (!$doctorRow) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($doctor_id)) {
-    $patient_id = $_POST['patient_id'];
+
+    $patient_id = $_POST['patient_id'] ?? null;
     $diagnosis = $_POST['diagnosis'];
     $feedback = $_POST['feedback'];
+    $fname = $_POST["first_name"] ?? null;
+    $mi = $_POST["middle_initial"] ?? null;
+    $lname = $_POST["last_name"] ?? null;
 
-    $insert_sql = "INSERT INTO `records` (`RecordID`, `Patient_ID`, `Doctor_ID`, `Diagnosis`, `Feedback`) VALUES (NULL, ?, ?, ?, ?);";
+    if ($patient_id) {
 
-    $stmt = $conn->prepare($insert_sql);
-    $stmt->bind_param("iiss", $patient_id, $doctor_id, $diagnosis, $feedback);
+        $insert_sql = "INSERT INTO `records` (`RecordID`, `Patient_ID`, `Doctor_ID`, `Diagnosis`, `Feedback`) VALUES (NULL, ?, ?, ?, ?);";
+        $stmt = $conn->prepare($insert_sql);
+        $stmt->bind_param("iiss", $patient_id, $doctor_id, $diagnosis, $feedback);
+
+    } elseif ($fname && $lname) {
+
+        $insert_sql = "INSERT INTO `records` (`RecordID`, `fname`, `middle_initial`, `lname`, `Doctor_ID`, `Diagnosis`, `Feedback`) VALUES (NULL, ?, ?, ?, ?, ?, ?);";
+        $stmt = $conn->prepare($insert_sql);
+        $stmt->bind_param("sssiss", $fname, $mi, $lname, $doctor_id, $diagnosis, $feedback);
+        
+    } else {
+        exit("Error: Either patient ID or patient's full name must be provided.");
+    }
 
     if ($stmt->execute()) {
         echo "success";

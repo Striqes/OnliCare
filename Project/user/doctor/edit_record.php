@@ -14,7 +14,11 @@ if ($_SESSION['UserType'] !== 'Doctor') {
     exit();
 }
 
-$record_id = isset($_GET['record_id']) ? intval($_GET['record_id']) : 0;
+$record_id = isset($_GET['record_id']) ? $_GET['record_id'] : "Bruh";
+
+if($record_id == "Bruh"){
+    header("Location: $doctorIndex");
+}
 
 // Get the doctor's ID based on the logged-in user ID
 $getDoctorsql = "SELECT Doctor_ID FROM doctor WHERE User_ID = ?";
@@ -42,6 +46,18 @@ $availability_row = $availability_result->fetch_assoc();
 $is_available = $availability_row ? $availability_row['is_available'] : 0;
 $availability_stmt->close();
 
+$searchRecord = "SELECT * FROM records WHERE RecordID = ?";
+$search_stmt = $conn->prepare($searchRecord);
+$search_stmt->bind_param("i", $record_id);
+$search_stmt->execute();
+$search_result = $search_stmt->get_result();
+$Records = $search_result->fetch_assoc();
+
+if(isset($Records['Patient_ID'])){
+    $patient_id = $Records['Patient_ID'];
+} else {
+    $patient_id = null;
+}
 ?>
 
 <!DOCTYPE html>
@@ -150,27 +166,57 @@ $availability_stmt->close();
     <div class="mx-14 mt-10 border-2 border-yellow-400 rounded-lg pl-28 pr-28">
             <div class="p-8">
             <form id="recordForm" method="POST">
+                <input type="hidden" name="record_id" value="<?php echo isset($_GET['record_id']) ? htmlspecialchars($_GET['record_id']) : ''; ?>">
                 <div class="flex flex-col gap-4 p-4 bg-green-800 rounded shadow">
                     <div class="text-lg font-semibold text-yellow-400">
-                        Create Medical Record
+                        Modify Medical Record
                     </div>
                 </div>
+
                 <div class="my-6 flex flex-col gap-4">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" id="nameToggle" name="nameToggle" class="form-checkbox"<?php if($patient_id) echo "checked" ?>>
+                        <span class="ml-2">Patient is a registered user.</span>
+                    </label>
+                    <div id="patientIdInput" class="patient-input"<?php if(!$patient_id) echo ' style="display: none;"'; ?>>
+                        <input type="text" name="patient_id" id="patient_id" class="block rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm" placeholder="Enter Patient ID" value="<?php if($patient_id) echo $patient_id ?>" >
+                    </div>
+                    <div id="patientNameInput" class="patient-input"<?php if($patient_id) echo ' style="display: none;"'; ?>>
+                        <input type="text" name="first_name" id="fname" class="block rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm " <?php 
+                                                                                                                                                                                                                                                                        if (!$patient_id) {
+                                                                                                                                                                                                                                                                            // If $patient_id does not exist, set the value attribute
+                                                                                                                                                                                                                                                                            echo "value=\"" . htmlspecialchars($Records['fname']) . "\"";
+                                                                                                                                                                                                                                                                        } else {
+                                                                                                                                                                                                                                                                            // If $patient_id exists, set the placeholder attribute
+                                                                                                                                                                                                                                                                            echo "placeholder=\"Enter First Name\"";
+                                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                                        ?>>
 
-                    <?php 
-                    
-                    $sql = "SELECT Patient_ID, Diagnosis, Feedback FROM records WHERE RecordID = $record_id";
-                    $result = $conn->query($sql);
-                    $row = $result->fetch_assoc();
+                        <input type="text" name="middle_initial" id="mi" class="block rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm mt-4" <?php 
+                                                                                                                                                                                                                                                                        if (!$patient_id) {
+                                                                                                                                                                                                                                                                            // If $patient_id does not exist, set the value attribute
+                                                                                                                                                                                                                                                                            echo "value=\"" . htmlspecialchars($Records['middle_initial']) . "\"";
+                                                                                                                                                                                                                                                                        } else {
+                                                                                                                                                                                                                                                                            // If $patient_id exists, set the placeholder attribute
+                                                                                                                                                                                                                                                                            echo "placeholder=\"Enter Middle Initial\"";
+                                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                                        ?>>
 
-                    ?>
-
-                    <input type="text" name="patient_id" class="block rounded-md border border-slate-300 bg-white px-3 py-2 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm" value="<?php echo $row['Patient_ID']?>">
-                    <input type="text" name="diagnosis" class="block rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm" value="<?php echo $row['Diagnosis']?>">
-                    <textarea name="feedback" class="block rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm"><?php echo $row['Feedback']?></textarea>
+                        <input type="text" name="last_name" id="lname" class="block rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm mt-4" <?php 
+                                                                                                                                                                                                                                                                        if (!$patient_id) {
+                                                                                                                                                                                                                                                                            // If $patient_id does not exist, set the value attribute
+                                                                                                                                                                                                                                                                            echo "value=\"" . htmlspecialchars($Records['lname']) . "\"";
+                                                                                                                                                                                                                                                                        } else {
+                                                                                                                                                                                                                                                                            // If $patient_id exists, set the placeholder attribute
+                                                                                                                                                                                                                                                                            echo "placeholder=\"Enter Last Name\"";
+                                                                                                                                                                                                                                                                        }
+                                                                                                                                                                                                                                                                        ?>>
+                    </div>
+                    <input type="text" name="diagnosis" class="block rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm" value="<?php echo $Records['Diagnosis']?>">
+                    <textarea name="feedback" class="block rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm"><?php echo $Records['Feedback']?></textarea>
                 </div>
                 <div class="text-center">
-                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Create Record</button>
+                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Modify Record</button>
                 </div>
             </form>
 
@@ -186,7 +232,7 @@ $availability_stmt->close();
     <footer class="bg-white shadow-md dark:bg-green-900">
         <div class="max-w-screen-xl mx-auto p-4 md:p-8 flex flex-col md:flex-row items-center justify-between">
             <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse mb-4 md:mb-0">
-                <img src="..\assets\onlicarelogo.svg" class="h-8" alt="Logo">
+                <img src="<?php echo "$url_root" . "assets/onlicarelogo.svg";?>" class="h-8" alt="Logo">
                 <span class="text-2xl font-semibold whitespace-nowrap dark:text-white">OnliCare</span>
             </a>
             <ul class="flex flex-wrap justify-center md:justify-end items-center space-x-4">
@@ -204,8 +250,6 @@ $availability_stmt->close();
 
         $(document).ready(function() {
             $('#recordForm').submit(function(event) {
-                event.preventDefault(); // Prevent the form from submitting normally
-
                 // Get form data
                 var formData = $(this).serialize();
 
@@ -220,10 +264,11 @@ $availability_stmt->close();
                         // Handle success or error response here
                         if (response.trim() === 'success') {
                             // Do something if the operation was successful
-                            alert('Record created successfully');
+                            alert('Record Edited successfully');
                         } else {
                             // Do something if there was an error
                             alert('Error: ' + response);
+                            console.log('Error: ' + response);
                         }
                     },
                     error: function(xhr, status, error) {
@@ -324,6 +369,29 @@ $availability_stmt->close();
             xhr.send("action=logout");
             location.reload();
         }
+
+        $(document).ready(function() {
+            $('#nameToggle').change(function() {
+                if (this.checked) {
+                    document.getElementById("patient_id").required = true;
+                    $('#patientIdInput').show();
+                    $('#patientNameInput').hide();
+                    document.getElementById("1");
+                    document.getElementById("fname").required = false;
+                    document.getElementById("mi").required = false;
+                    document.getElementById("lname").required = false;
+
+                } else {
+                    document.getElementById("patient_id").value = '';
+                    document.getElementById("fname").required = true;
+                    document.getElementById("mi").required = true;
+                    document.getElementById("lname").required = true;
+                    $('#patientNameInput').show();
+                    $('#patientIdInput').hide();
+                    document.getElementById("patient_id").required = false;
+                }
+            });
+        });
 
     </script>
 
