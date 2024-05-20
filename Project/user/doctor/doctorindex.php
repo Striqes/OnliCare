@@ -198,7 +198,7 @@ $result = $stmt->get_result();
                             $currentDate = new DateTime();
                             $currentDate->setTimezone(new DateTimeZone('Asia/Manila'));
         
-                            // If the appointment date is in the past, update is_visible to 0 and skip rendering this row
+                            // If the appointment "date is in the past, update is_visible to 0 and skip rendering this row"
                             if ($appointmentDate < $currentDate) {
                                 $appointmentId = $row['AppointmentID'];
                                 $sql = "UPDATE appointment SET is_visible = 0 WHERE AppointmentID = $appointmentId";
