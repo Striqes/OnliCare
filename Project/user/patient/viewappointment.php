@@ -78,10 +78,14 @@ $result = $stmt->get_result();
                 <div class="gap-8 nav-links duration-500 md:static absolute md:min-h-fit bg-green-900 max-h-[15vh] left-0 top-[-100%] md:w-auto w-full flex items-center p-5">
                     <ul class="mx-auto md:ml-0 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-[2vw]">
                         <li>
-                            <a href="#" onclick="onToggleMenu(this); scrollToContent('home')" class="block py-2 px-3 text-white rounded hover:bg-transparent hover:text-green-700 dark:text-white dark:hover:text-yellow-300">Appointment List</a>
+                       
+                            <a href="../../index.php#home" class="block py-2 px-3 text-white rounded hover:bg-transparent hover:text-green-700 dark:text-white dark:hover:text-yellow-300">Home</a>
                         </li>
                         <li>
-                            <a href="#" onclick="onToggleMenu(this); scrollToContent('about-us')" class="block py-2 px-3 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">ana pay maikabi?</a>
+                            <a href="../../index.php#about-us" class="block py-2 px-3 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">About</a>
+                        </li>
+                        <li>
+                            <a href="../../index.php#services" class="block py-2 px-3 text-yellow-900 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">Services</a>
                         </li>
                     </ul>
                     <ul id="loginButtons" class="mx-auto md:ml-0 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-[2vw]">
@@ -192,15 +196,62 @@ $result = $stmt->get_result();
             var loginButtons = document.getElementById("loginButtons");
             if (loginButtons) {
                 loginButtons.innerHTML = `
-                    <li>
-                        <a href="<?php echo $defProfile?>" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Profile</a>
-                    </li>
+
+
+                    <?php 
+                    
+                        if(!isset($_SESSION['user_id'])){
+                            exit();
+                        } else {
+                            if($_SESSION['UserType'] == 'Patient'){
+                                echo
+                                '<li>
+                                    <a href="'. $appointment .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Make an Appointment</a>
+                                </li>';
+                                if($_SESSION['UserType'] == 'Patient'){
+                                    echo
+                                    '<li>
+                                        <a href="'. $ViewAppointment .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">View Appointments</a>
+                                    </li>';
+                                }
+                            }else if($_SESSION['UserType'] == 'Doctor'){
+                                echo
+                                '<li>
+                                    <a href="'. $doctorIndex .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Dashboard</a>
+                                </li>
+                                
+                                <li>
+                                    <a href="'. $doctorProfile .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Profile</a>
+                                </li>
+                                ';
+                            }else if($_SESSION['UserType'] == 'Admin'){
+                                echo
+                                '<li>
+                                    <a href="'. $adminIndex .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Admin Panel</a>
+                                </li>';
+                            } else {
+                                exit('Unknown User Type');
+                            }
+
+                            if($_SESSION['UserType'] == 'Doctor'){
+
+                            } else {
+                                echo
+                                '<li>
+                                    <a href="'. $defProfile .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Profile</a>
+                                </li>';
+                            }
+                        }
+
+                    ?>
+
                     <li>
                         <button type="submit" onclick="logout()" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Log out</button>
                     </li>
                 `;
             }
         }
+
 
         function logout() {
             var xhr = new XMLHttpRequest();
