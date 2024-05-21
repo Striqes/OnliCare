@@ -13,7 +13,7 @@ if ($_SESSION['UserType'] !== 'Patient') {
     exit();
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+/* if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['select_doctor']) && isset($_POST['date']) && isset($_POST['textarea'])) {
         
         $user_id = $_SESSION['user_id'];
@@ -76,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         echo 'All form fields are required.';
     }
-}
+} */
 
     if (isset($_SESSION['message'])) {
         echo '<script type="text/javascript">alert("' . $_SESSION['message'] . '");</script>';
@@ -137,7 +137,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
   <div class="mt-3 text-center text-4xl font-bold">Make an Appointment</div>
   <div class="p-8">
-  <form  method="POST">
+  <form action="handle_appointment.php" method="post">
   <div class="flex flex-col gap-4 p-4 bg-green-800 rounded shadow">
         <?php
         $user_id = $_SESSION['user_id']; 
@@ -225,9 +225,7 @@ function updateDoctors() {
 </div>
 
     </main>
-
-
-
+    
     <!-- FOOTER -->
     <footer class="bg-white shadow-md dark:bg-green-900">
         <div class="max-w-screen-xl mx-auto p-4 md:p-8 flex flex-col md:flex-row items-center justify-between">
