@@ -1,6 +1,7 @@
 <?php
 include 'core/connection.php';
 
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST["email"];
     $password = $_POST["password"];
@@ -12,32 +13,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
 
-    // Verify password
-    if (password_verify($password, $user['Password'])) {
-        $_SESSION['email'] = $email;
-        $_SESSION['user_id'] = $user['UserID'];
-        $_SESSION['UserType'] = $user['UserType'];
+    // Check if user exists
+    if ($user) {
+        // Verify password
+        if (password_verify($password, $user['Password'])) {
+            $_SESSION['email'] = $email;
+            $_SESSION['user_id'] = $user['UserID'];
+            $_SESSION['UserType'] = $user['UserType'];
 
-        // Check user type and redirect accordingly
-        if ($user['UserType'] == 'Admin'){
-            header("Location: $adminIndex");
-            exit;
-        } else if ($user['UserType'] == 'Doctor'){
-            header("Location: $doctorIndex");
+            // Check user type and redirect accordingly
+            if ($user['UserType'] == 'Admin'){
+                header("Location: $adminIndex");
+                exit;
+            } else if ($user['UserType'] == 'Doctor'){
+                header("Location: $doctorIndex");
+            }
+            else if ($user['UserType'] == 'Patient'){
+                header("Location: $indexPath");
+            }
+            exit();
+        } else {
+            echo '<script>alert("The password you entered was not valid."); window.history.back();</script>';
         }
-        else if ($user['UserType'] == 'Patient'){
-            header("Location: $indexPath");
+        } else {
+            echo '<script>alert("The email you entered does not exist."); window.history.back();</script>';
         }
-        exit();
-    } else {
-        // Password is incorrect
-        echo "The password you entered was not valid.";
-    }
 }
-
 
 $conn->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
