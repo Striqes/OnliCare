@@ -1,84 +1,6 @@
 <?php
 include 'core/connection.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $first_name = $_POST["name"];
-    
-    $middle_initial = $_POST["middleName"];
-    $last_name = $_POST["LastName"];
-    $email = $_POST["email"];
-    $password = $_POST["password"];
-    $password_confirmation = $_POST["password_confirmation"];
-    $user_type = "Patient"; 
-    $country = $_POST["country"];
-    $province = $_POST["province"];
-    $city = $_POST["city"];
-    $barangay = $_POST["barangay"];
-    $zipcode = $_POST["zipcode"];
-
-    // Hash the password
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-    // Check if email already exists
-    $sql = "SELECT * FROM user WHERE Email = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows > 0) {
-        echo "Email already exists.";
-        exit();
-    }
-    $stmt->close();
-
-    // Prepare and execute address insertion
-    $sql_address = "INSERT INTO address (Country, Province, City, Baranggay, Zip_Code) VALUES (?, ?, ?, ?, ?)";
-    $stmt_address = $conn->prepare($sql_address);
-    $stmt_address->bind_param("sssss", $country, $province, $city, $barangay, $zipcode);
-
-    // Execute address insertion
-    if (!$stmt_address->execute()) {
-        echo "Error inserting address: " . $stmt_address->error;
-        exit();
-    }
-
-    // Get the ID of the inserted address
-    $address_id = $stmt_address->insert_id;
-
-    // Prepare and execute user insertion
-    $sql_user = "INSERT INTO user (First_Name, Middle_Initial, Last_Name, Email, Address_ID, UserType, Password) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    $stmt_user = $conn->prepare($sql_user);
-    $stmt_user->bind_param("ssssiss", $first_name, $middle_initial, $last_name, $email, $address_id, $user_type, $hashed_password);
-
-    // Execute user insertion
-    if (!$stmt_user->execute()) {
-        echo "Error inserting user: " . $stmt_user->error;
-        exit();
-    }
-
-    // Insert patient
-    $user_id = $stmt_user->insert_id; // Get the ID of the inserted user
-
-    $sql_patient = "INSERT INTO patient (User_ID) VALUES (?)";
-    $stmt_patient = $conn->prepare($sql_patient);
-    $stmt_patient->bind_param("i", $user_id); // Bind the user ID for the patient
-
-    // Execute patient insertion
-    if ($stmt_patient->execute()) {
-        header('Location: ..\index.php');
-        exit();
-    } else {
-        echo "Error inserting Patient: " . $stmt_patient->error;
-        exit();
-    }
-
-    $stmt_address->close();
-    $stmt_user->close();
-    $stmt_patient->close();
-
-}
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -89,6 +11,7 @@ $conn->close();
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="..\output.css">
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
     <div class="bg-gray-200 w-full min-h-screen flex items-center justify-center">
@@ -103,7 +26,7 @@ $conn->close();
                     <h2 class="text-center text-2xl font-bold tracking-wide text-gray-800">Sign Up</h2>
                     <p class="text-center text-sm text-gray-600 mt-2">Already have an account? <a href="login.html" class="text-blue-600 hover:text-blue-700 hover:underline" title="Sign In">Sign in here</a></p>
 
-                    <form class="my-8 text-sm" method = "post" onsubmit="return validateForm()">
+                    <form id="signupForm" class="my-8 text-sm" method = "post" onsubmit="return validateForm()">
                         <div class="flex flex-col my-4">
                             <label for="name" class="text-gray-700">First Name</label>
                             <input type="text" name="name" id="name" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your name" required>
@@ -187,6 +110,35 @@ $conn->close();
         </div>
 
     <script>
+
+        $(document).ready(function() {
+            $('#signupForm').submit(function(e) {
+                e.preventDefault(); // Prevent default form submission
+
+                // Serialize form data
+                var formData = $(this).serialize();
+
+                // Send form data to signup.php using AJAX
+                $.ajax({
+                    type: 'POST',
+                    url: 'signupBackend.php',
+                    data: formData,
+                    success: function(response) {
+                        // Handle success response
+                        alert(response);
+
+                        if(response == "Account Successfully Created"){
+                            window.location.href = '<?php echo $indexPath?>';
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error
+                        alert(xhr.responseText);
+                    }
+                });
+            });
+        });
+
         function validateForm() {
             var password = document.getElementById("password").value;
             var password_confirmation = document.getElementById("password_confirmation").value;
