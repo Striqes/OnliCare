@@ -1,87 +1,74 @@
 <?php
+include '../core/sessiontimeout.php';
 include '../core/connection.php';
-//include '../core/sessiontimeout.php';
+
 // Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: $indexPath");
     exit();
 }
 
-// User Type verification
-if ($_SESSION['UserType'] !== 'Patient') {
-    header("Location: $indexPath");
-    exit();
+// Get the Patient's ID based on the logged-in user ID
+$getPatientsql = "SELECT Patient_ID FROM Patient WHERE User_ID = ?";
+$getPatientsql_stmt = $conn->prepare($getPatientsql);
+$getPatientsql_stmt->bind_param("i", $_SESSION['user_id']);
+$getPatientsql_stmt->execute();
+$getPatient_result = $getPatientsql_stmt->get_result();
+$PatientRow = $getPatient_result->fetch_assoc();
+
+if (!$PatientRow) {
+    exit('Patient ID not found. Contact Administrator!');
+} else {
+    $patient_id = $PatientRow['Patient_ID'];
 }
 
-/* if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST['select_doctor']) && isset($_POST['date']) && isset($_POST['textarea'])) {
-        
-        $user_id = $_SESSION['user_id'];
-        $doctor_id = $_POST['select_doctor'];
-        $date = $_POST['date'];
-        $message = $_POST['textarea'];
-
-        $currentDate = date('Y-m-d');
-        $currentTime = date('H:i:s');
-        $noonTime = "12:00:00";
-
-        if ($date < $currentDate) {
-            echo '<script>alert("Cannot book an appointment in the past."); window.location.href = "appointment.php";</script>';
-            exit();
-        }
-
-        // Check if the date is today and the current time is past 12 PM
-        if ($date == $currentDate && $currentTime > $noonTime) {
-            echo '<script>alert("Cannot book an appointment for today please select another day."); window.location.href = "appointment.php"; </script>';
-            exit();
-        }
-
-        // Check if the date is more than a month in the future
-        $oneMonthFromNow = date('Y-m-d', strtotime('+1 month'));
-        if ($date > $oneMonthFromNow) {
-            echo '<script>alert("Cannot book an appointment more than a month in advance."); window.location.href = "appointment.php"; </script>';
-            exit();
-        }
-
-
-        if (empty($doctor_id) || empty($date) || empty($message)) {
-            exit('All form fields are required.');
-        }
-
-        // Get the Patient_ID using the User_ID
-        $sql_get_patient_id = "SELECT Patient_ID FROM patient WHERE User_ID = ?";
-        $stmt_get_patient_id = $conn->prepare($sql_get_patient_id);
-        $stmt_get_patient_id->bind_param("i", $user_id);
-        $stmt_get_patient_id->execute();
-        $result_get_patient_id = $stmt_get_patient_id->get_result();
-        if ($result_get_patient_id->num_rows === 0) {
-            exit('User is not a patient.');
-        }                                                                           
-        $row = $result_get_patient_id->fetch_assoc();
-        $patient_id = $row['Patient_ID'];
-        $stmt_get_patient_id->close();
+// Retrieve appointments for the Patient
+    $sql = "
+        SELECT 
+            r.RecordID, 
+            IFNULL(r.Patient_ID, NULL) AS Patient_ID, 
+            r.Doctor_ID, 
+            r.Diagnosis, 
+            r.Feedback, 
+            CASE 
+                WHEN r.Patient_ID IS NULL THEN SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(r.Patient_ID, CONCAT(r.fname, ' ', IFNULL(r.middle_initial, ''), ' ', r.lname)), ' ', 1), ' ', -1) 
+                ELSE pUser.First_Name 
+            END AS Patient_First_Name, 
+            CASE 
+                WHEN r.Patient_ID IS NULL THEN 
+                    CASE 
+                        WHEN LENGTH(IFNULL(r.Patient_ID, CONCAT(r.fname, ' ', IFNULL(r.middle_initial, ''), ' ', r.lname))) - LENGTH(REPLACE(IFNULL(r.Patient_ID, CONCAT(r.fname, ' ', IFNULL(r.middle_initial, ''), ' ', r.lname)), ' ', '')) > 1 THEN 
+                            SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(r.Patient_ID, CONCAT(r.fname, ' ', IFNULL(r.middle_initial, ''), ' ', r.lname)), ' ', 2), ' ', -1)
+                        ELSE 
+                            NULL
+                    END
+                ELSE pUser.Middle_Initial 
+            END AS Patient_Middle_Initial, 
+            CASE 
+                WHEN r.Patient_ID IS NULL THEN 
+                    SUBSTRING_INDEX(IFNULL(r.Patient_ID, CONCAT(r.fname, ' ', IFNULL(r.middle_initial, ''), ' ', r.lname)), ' ', -1) 
+                ELSE pUser.Last_Name 
+            END AS Patient_Last_Name, 
+            dUser.First_Name AS Doctor_First_Name, 
+            dUser.Last_Name AS Doctor_Last_Name
+        FROM 
+            records r
+        LEFT JOIN 
+            patient p ON r.Patient_ID = p.Patient_ID
+        LEFT JOIN 
+            user pUser ON p.User_ID = pUser.UserID
+        JOIN 
+            doctor d ON r.Doctor_ID = d.Doctor_ID
+        JOIN 
+            user dUser ON d.User_ID = dUser.UserID
+        WHERE
+            r.Patient_ID = ? AND r.visible = 1;
+    ";
     
-        $sql = "INSERT INTO appointment (Doctor_ID, Patient_ID, date, Message) VALUES (?, ?, ?,? )";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iiss", $doctor_id, $patient_id, $date, $message);
-        $stmt->execute();
-
-        if ($stmt->affected_rows === 0) {
-            exit('Failed to make an appointment.');
-        } else {
-            $_SESSION['message'] = "Appointment successfully made. Please Wait for approval of Doctor.";
-            header("Location: appointment.php"); 
-            exit();
-        }
-    } else {
-        echo 'All form fields are required.';
-    }
-} */
-
-    if (isset($_SESSION['message'])) {
-        echo '<script type="text/javascript">alert("' . $_SESSION['message'] . '");</script>';
-        unset($_SESSION['message']);
-    }
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $patient_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
 ?>
 
@@ -123,98 +110,54 @@ if ($_SESSION['UserType'] !== 'Patient') {
     </header>
 
     <main class="bg-gray-100 p-20 pl-24 min-h-screen">
-            
-  <div class="mt-3 text-center text-4xl font-bold">Make an Appointment</div>
-  <div class="p-8">
-  <form action="handle_appointment.php" method="post">
-  <div class="flex flex-col gap-4 p-4 bg-green-800 rounded shadow">
-        <?php
-        $user_id = $_SESSION['user_id']; 
-        $query = "SELECT First_Name, Middle_Initial, Last_Name FROM user WHERE UserID = ?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("i", $user_id); // "i" indicates the variable type is integer
 
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $user = $result->fetch_assoc();
-        ?>
-        <div class="text-lg font-semibold text-yellow-400">
-            <?php echo "FULL NAME: " . strtoupper($user['First_Name'] . " " . $user['Middle_Initial'] . ". " . $user['Last_Name']); ?>
+        <div class="mb-8">
+            <a href="add_record.php" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Record</a>
         </div>
-    </div>
 
-    <div class="my-6 flex gap-4">
-        <select name="select_department" id="department" onchange="updateDoctors(this.value)" class="block w-1/2 rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm">
-            <option class="font-semibold text-slate-300">Please Select department</option>
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Record ID</th>
+                    <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Diagnosis</th>
+                    <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Feedback</th>
+                    <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Patient ID</th>
+                    <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Patient Name</th>
+                    <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Doctor ID</th>
+                    <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Recorded By</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
             <?php
-            $sql = "SELECT department_name FROM department";
-            $result = $conn->query($sql);
+                while ($row = $result->fetch_assoc()) {
+                    echo "
+                    <tr>
+                        <td class='px-6 py-4 text-start whitespace-nowrap text-sm font-medium text-gray-800'>{$row['RecordID']}</td>
+                        <td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['Diagnosis']}</td>
+                        <td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['Feedback']}</td>
+                        <td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>";
 
-            if ($result->num_rows > 0) {
-                while($row = $result->fetch_assoc()) {
-                    echo '<option value="'.$row['department_name'].'">'.$row['department_name'].'</option>';
+                    if(isset($row['Patient_ID'])){ 
+                        echo $row['Patient_ID']; 
+                    } else {
+                        echo "Not Registered";
+                    }
+
+                    echo "</td>
+                        <td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['Patient_First_Name']} {$row['Patient_Middle_Initial']}. {$row['Patient_Last_Name']}</td>
+                        <td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>{$row['Doctor_ID']}</td>
+                        <td class='px-6 py-4 text-start whitespace-nowrap text-sm text-gray-800'>Dr. {$row['Doctor_First_Name']} {$row['Doctor_Last_Name']}</td>
+                    </tr>";
                 }
-            } else {
-                echo '<option>No departments found</option>';
-            }
+                
             ?>
-        </select>
-        <select name="select_doctor" id="doctor" class="block w-1/2 rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm">
-        <option class="font-semibold text-slate-300">Please Select doctor</option>
-        </select>
-    </div>
-    <script>
-function updateDoctors() {
-    var deptName = $("#department").val().trim();  // Ensure no trailing spaces or newlines
 
-    $.ajax({
-        url: '../core/get_doctors.php',
-        type: 'POST',
-        data: { department: deptName },
-        dataType: 'json',
-        success: function(response) {
-            console.log(response);  // Log the response for debugging
-            var len = response.length;
-            $("#doctor").empty(); // Clear the existing options
-
-            if (len > 0) {
-                for (var i = 0; i < len; i++) {
-                    var name = "Dr. " + response[i]['First_Name'] + " " + response[i]['Last_Name'];
-                    var id = response[i]['Doctor_ID'];
-                    $("#doctor").append("<option value='" + id + "'>" + name + "</option>");
-                }
-            } else {
-                // Add a default option if no doctors are found
-                $("#doctor").append("<option value=''>No available doctors</option>");
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error("An error occurred while fetching doctors: ", status, error);
-            alert("An error occurred while fetching doctors. Please try again later.");
-        }
-    });
-}
-</script>
-
-
-
-
-
-    <div class="my-6 flex gap-4">     
-    <input type="date" name="date" class="block w-full rounded-md border border-slate-300 bg-white px-3 py-4 font-semibold text-gray-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm" required>
-    </div>
-        <div class="">
-        <textarea name="textarea" id="text" cols="30" rows="10" class="mb-10 h-40 w-full resize-none rounded-md border border-slate-300 p-5 font-semibold text-black" placeholder="Message"></textarea>
-        </div>
-        <div class="text-center">
-        <button type="submit" class="rounded-lg bg-blue-700 px-8 py-5 text-sm font-semibold text-white">Book Appointment</button>
-        </div>
-    </form>
-  </div>
-</div>
-
+            </tbody>
+        </table>
     </main>
-    
+   
+
+
     <!-- FOOTER -->
     <footer class="bg-white shadow-md dark:bg-green-900">
         <div class="max-w-screen-xl mx-auto p-4 md:p-8 flex flex-col md:flex-row items-center justify-between">
@@ -255,6 +198,29 @@ function updateDoctors() {
             e.name = e.name === 'menu' ? 'close' : 'menu'
             navLinks.classList.toggle('top-[9%]')
             // navLinks.classList.toggle('hidden');
+        }
+
+        function deleteRecord(recordID) {
+            if (confirm("Are you sure you want to delete this record?")) {
+                // Perform AJAX request to delete the record
+                // Example using jQuery AJAX
+                $.ajax({
+                    url: 'deleteRecord.php',
+                    type: 'POST',
+                    data: { record_id: recordID },
+                    success: function(response) {
+                        // Handle success response
+                        // For example, you can redirect to a different page
+                        alert(response);
+                        console.error(response);
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error
+                        console.error(error);
+                    }
+                });
+            }
         }
 
         function changeLoginButtonsContent() {
@@ -319,7 +285,6 @@ function updateDoctors() {
                 `;
             }
         }
-
 
         function logout() {
             var xhr = new XMLHttpRequest();

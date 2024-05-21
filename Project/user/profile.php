@@ -29,24 +29,13 @@ include '../user/core/sessiontimeout.php';
     <header>
         <nav class="bg-white border-b border-gray-200 dark:bg-green-900">
             <div class="max-w-screen-xl mx-auto px-4 py-6 flex items-center justify-between">
-                <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
-                    <img src="..\..\assets\onlicarelogo.svg" class="h-10" alt="Logo" />
+                <a href="<?php echo $indexPath;?>" class="flex items-center space-x-3 rtl:space-x-reverse">
+                    <img src="<?php echo "$url_root" . "assets/onlicarelogo.svg";?>" class="h-10" alt="Logo" />
                     <span class="text-2xl font-semibold whitespace-nowrap dark:text-yellow-400">OnliCare</span>
                 </a>
 
                 <!-- MENU BAR -->
                 <div class="gap-8 nav-links duration-500 md:static absolute md:min-h-fit bg-green-900 max-h-[15vh] left-0 top-[-100%] md:w-auto w-full flex items-center p-5">
-                    <ul class="mx-auto md:ml-0 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-[2vw]">
-                        <li>
-                            <a href="../index.php#home" class="block py-2 px-3 text-white rounded hover:bg-transparent hover:text-green-700 dark:text-white dark:hover:text-yellow-300">Home</a>
-                        </li>
-                        <li>
-                            <a href="../index.php#about-us" class="block py-2 px-3 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">About</a>
-                        </li>
-                        <li>
-                            <a href="../index.php#services" class="block py-2 px-3 text-yellow-900 rounded hover:text-green-700 dark:text-white dark:hover:text-yellow-500">Services</a>
-                        </li>
-                    </ul>
                     <ul id="loginButtons" class="mx-auto md:ml-0 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-[2vw]">
                         <li>
                             <a href="user/login.php" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Log in</a>
@@ -55,10 +44,8 @@ include '../user/core/sessiontimeout.php';
                             <a href="user/signup.php" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">Sign up</a>
                         </li>
                     </ul>
+        
                 </div>
-
-                
-                <ion-icon onclick="onToggleMenu(this)" name="menu" class="text-3xl cursor-pointer md:hidden"></ion-icon>
             </div>
         </nav>
     </header>
@@ -288,6 +275,9 @@ include '../user/core/sessiontimeout.php';
                                     echo
                                     '<li>
                                         <a href="'. $ViewAppointment .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">View Appointments</a>
+                                    </li>
+                                    <li>
+                                        <a href="'. $patientRecords .'" class="block py-2 px-3 bg-yellow-600 text-black rounded dark:text-blac dark:hover:text-white">View Records</a>
                                     </li>';
                                 }
                             }else if($_SESSION['UserType'] == 'Doctor'){

@@ -67,7 +67,7 @@ $result = $stmt->get_result();
     <header>
         <nav class="bg-white border-b border-gray-200 dark:bg-green-900">
             <div class="max-w-screen-xl mx-auto px-4 py-6 flex items-center justify-between">
-                <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
+                <a href="<?php echo $indexPath;?>" class="flex items-center space-x-3 rtl:space-x-reverse">
                     <img src="<?php echo "$url_root" . "assets/onlicarelogo.svg";?>" class="h-10" alt="Logo" />
                     <span class="text-2xl font-semibold whitespace-nowrap dark:text-yellow-400">OnliCare</span>
                 </a>
